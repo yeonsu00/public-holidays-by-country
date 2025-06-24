@@ -7,6 +7,8 @@ import org.springframework.http.HttpStatus;
 public enum ResponseCode {
 
     OK(HttpStatus.OK, "SUCCESS"),
+
+    COUNTRY_NOT_FOUND(HttpStatus.NOT_FOUND, "COUNTRY_NOT_FOUND"),
     ;
 
     private final HttpStatus httpStatus;
