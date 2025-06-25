@@ -48,27 +48,28 @@ public class HolidayRepositoryImpl implements HolidayRepository {
     public List<Holiday> findByYearAndCountryCode(List<Integer> year, List<String> countryCode) {
         List<HolidayEntity> holidayEntities = holidayJpaRepository.findByYearInAndCountryCodeIn(year, countryCode).orElseThrow();
 
-        return holidayEntities.stream()
-                .map(HolidayEntity::toHoliday)
-                .toList();
+        return getHolidays(holidayEntities);
     }
 
     @Override
     public List<Holiday> findByYear(List<Integer> year) {
         List<HolidayEntity> holidayEntities = holidayJpaRepository.findByYearIn(year).orElseThrow();
 
-        return holidayEntities.stream()
-                .map(HolidayEntity::toHoliday)
-                .toList();
+        return getHolidays(holidayEntities);
     }
 
     @Override
     public List<Holiday> findByCountryCodeIn(List<String> countryCode) {
         List<HolidayEntity> holidayEntities = holidayJpaRepository.findByCountryCodeIn(countryCode).orElseThrow();
 
-        return holidayEntities.stream()
-                .map(HolidayEntity::toHoliday)
-                .toList();
+        return getHolidays(holidayEntities);
+    }
+
+    @Override
+    public List<Holiday> findAll() {
+        List<HolidayEntity> holidayEntities = holidayJpaRepository.findAll();
+
+        return getHolidays(holidayEntities);
     }
 
     private HolidayEntity saveHoliday(Holiday holiday) {
@@ -88,5 +89,11 @@ public class HolidayRepositoryImpl implements HolidayRepository {
                 .map(type -> new HolidayTypeEntity(savedHolidayEntity.getHolidayId(), type))
                 .toList();
         holidayTypeJpaRepository.saveAll(holidayTypeEntities);
+    }
+
+    private List<Holiday> getHolidays(List<HolidayEntity> holidayEntities) {
+        return holidayEntities.stream()
+                .map(HolidayEntity::toHoliday)
+                .toList();
     }
 }

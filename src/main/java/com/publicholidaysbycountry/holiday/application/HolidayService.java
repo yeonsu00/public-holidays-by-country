@@ -60,6 +60,6 @@ public class HolidayService {
 
     @Transactional(readOnly = true)
     public List<HolidayResponseDTO> getAllHolidays() {
-        return null;
+        return HolidayResponseDTO.fromHolidays(holidayRepository.findAll());
     }
 }
