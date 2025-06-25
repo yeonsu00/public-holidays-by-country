@@ -22,9 +22,12 @@ public class HolidayRepositoryImpl implements HolidayRepository {
     private final CountryJpaRepository countryJpaRepository;
 
     @Override
-    public void save(List<Holiday> holidays) {
+    public int save(List<Holiday> holidays) {
+        int savedHolidayCount = 0;
+
         for (Holiday holiday : holidays) {
             HolidayEntity savedHolidayEntity = saveHoliday(holiday);
+            savedHolidayCount++;
 
             if (holiday.hasCounties()) {
                 saveHolidayCounties(holiday, savedHolidayEntity);
@@ -34,6 +37,8 @@ public class HolidayRepositoryImpl implements HolidayRepository {
                 saveHolidayTypes(holiday, savedHolidayEntity);
             }
         }
+
+        return savedHolidayCount;
     }
 
     @Override

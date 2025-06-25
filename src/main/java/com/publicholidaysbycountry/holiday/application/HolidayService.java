@@ -18,9 +18,9 @@ public class HolidayService {
     private final HolidayApiClient holidayApiClient;
 
     @Transactional
-    public void saveHolidays(List<Country> countries, int currentYear) {
+    public int saveHolidays(List<Country> countries, int currentYear) {
         List<Holiday> holidays = getApiRequest(countries, currentYear);
-        holidayRepository.save(holidays);
+        return holidayRepository.save(holidays);
     }
 
     public void deleteAllHolidays() {

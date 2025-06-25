@@ -24,8 +24,9 @@ public class HolidayController {
     public CommonApiResponse<String> saveHolidaysByCountryAndYear() {
         holidayInitializationFacade.deleteAllHolidaysAndCountries();
         List<Country> countries = countryService.saveCountries();
-        holidayService.saveHolidays(countries, LocalDate.now().getYear());
-        return CommonApiResponse.success("최근 "+ Constants.YEAR_RANGE + "년 공휴일이 성공적으로 저장되었습니다.");
+        int savedHolidayCount = holidayService.saveHolidays(countries, LocalDate.now().getYear());
+        return CommonApiResponse.success(
+                "최근 " + Constants.YEAR_RANGE + "년 공휴일 " + savedHolidayCount + "개가 성공적으로 저장되었습니다.");
     }
 
 }
