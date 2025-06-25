@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 
 @Service
@@ -18,6 +19,7 @@ public class HolidayService {
     private final HolidayRepository holidayRepository;
     private final RestTemplate restTemplate;
 
+    @Transactional
     public void saveHolidays(List<Country> countries, int currentYear) {
         List<Holiday> holidays = getApiRequest(countries, currentYear);
         holidayRepository.save(holidays);
