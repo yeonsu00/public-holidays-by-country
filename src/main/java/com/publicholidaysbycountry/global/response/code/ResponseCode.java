@@ -9,6 +9,8 @@ public enum ResponseCode {
     OK(HttpStatus.OK, "SUCCESS"),
 
     COUNTRY_NOT_FOUND(HttpStatus.NOT_FOUND, "COUNTRY_NOT_FOUND"),
+    HOLIDAY_NOT_FOUND(HttpStatus.NOT_FOUND, "HOLIDAY_NOT_FOUND"),
+    INVALID_HOLIDAY_TYPE(HttpStatus.NOT_FOUND, "INVALID_HOLIDAY_TYPE"),
     ;
 
     private final HttpStatus httpStatus;

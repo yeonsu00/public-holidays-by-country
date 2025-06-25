@@ -13,4 +13,14 @@ public class GlobalExceptionHandler {
         return CommonApiResponse.failure(ResponseCode.COUNTRY_NOT_FOUND, ex.getMessage());
     }
 
+    @ExceptionHandler(HolidayNotFoundException.class)
+    public CommonApiResponse<?> handleHolidayNotFoundException(CountryNotFoundException ex) {
+        return CommonApiResponse.failure(ResponseCode.HOLIDAY_NOT_FOUND, ex.getMessage());
+    }
+
+    @ExceptionHandler(InvalidHolidayTypeException.class)
+    public CommonApiResponse<?> handleInvalidHolidayTypeException(InvalidHolidayTypeException ex) {
+        return CommonApiResponse.failure(ResponseCode.INVALID_HOLIDAY_TYPE, ex.getMessage());
+    }
+
 }
