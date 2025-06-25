@@ -54,7 +54,8 @@ public class HolidayService {
 
     @Transactional(readOnly = true)
     public List<HolidayResponseDTO> getHolidaysByCountry(List<String> countryCode) {
-        return null;
+        List<Holiday> holidays = holidayRepository.findByCountryCodeIn(countryCode);
+        return HolidayResponseDTO.fromHolidays(holidays);
     }
 
     @Transactional(readOnly = true)

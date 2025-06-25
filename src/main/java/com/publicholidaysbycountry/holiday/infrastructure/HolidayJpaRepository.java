@@ -9,4 +9,6 @@ public interface HolidayJpaRepository extends JpaRepository<HolidayEntity, Long>
     Optional<List<HolidayEntity>> findByYearInAndCountryCodeIn(List<Integer> year, List<String> countryCode);
 
     Optional<List<HolidayEntity>> findByYearIn(List<Integer> year);
+
+    Optional<List<HolidayEntity>> findByCountryCodeIn(List<String> countryCode);
 }

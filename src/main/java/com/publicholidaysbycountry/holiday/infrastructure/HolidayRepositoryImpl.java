@@ -62,6 +62,15 @@ public class HolidayRepositoryImpl implements HolidayRepository {
                 .toList();
     }
 
+    @Override
+    public List<Holiday> findByCountryCodeIn(List<String> countryCode) {
+        List<HolidayEntity> holidayEntities = holidayJpaRepository.findByCountryCodeIn(countryCode).orElseThrow();
+
+        return holidayEntities.stream()
+                .map(HolidayEntity::toHoliday)
+                .toList();
+    }
+
     private HolidayEntity saveHoliday(Holiday holiday) {
         HolidayEntity holidayEntity = HolidayEntity.fromHoliday(holiday);
         return holidayJpaRepository.save(holidayEntity);

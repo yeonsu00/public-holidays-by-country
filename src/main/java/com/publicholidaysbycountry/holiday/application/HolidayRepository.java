@@ -11,4 +11,6 @@ public interface HolidayRepository {
     List<Holiday> findByYearAndCountryCode(List<Integer> year, List<String> countryCode);
 
     List<Holiday> findByYear(List<Integer> year);
+
+    List<Holiday> findByCountryCodeIn(List<String> countryCode);
 }
