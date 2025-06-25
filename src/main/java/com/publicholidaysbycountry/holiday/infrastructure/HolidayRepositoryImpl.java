@@ -7,6 +7,8 @@ import com.publicholidaysbycountry.holiday.infrastructure.entity.HolidayEntity;
 import com.publicholidaysbycountry.holiday.infrastructure.entity.HolidayTypeEntity;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 
 @Repository
@@ -45,31 +47,27 @@ public class HolidayRepositoryImpl implements HolidayRepository {
     }
 
     @Override
-    public List<Holiday> findByYearAndCountryCode(List<Integer> year, List<String> countryCode) {
-        List<HolidayEntity> holidayEntities = holidayJpaRepository.findByYearInAndCountryCodeIn(year, countryCode);
-
-        return getHolidays(holidayEntities);
+    public Page<Holiday> findByYearAndCountryCode(List<Integer> year, List<String> countryCode, Pageable pageable) {
+        Page<HolidayEntity> holidayEntities = holidayJpaRepository.findByYearInAndCountryCodeIn(year, countryCode, pageable);
+        return holidayEntities.map(HolidayEntity::toHoliday);
     }
 
     @Override
-    public List<Holiday> findByYear(List<Integer> year) {
-        List<HolidayEntity> holidayEntities = holidayJpaRepository.findByYearIn(year);
-
-        return getHolidays(holidayEntities);
+    public Page<Holiday> findByYear(List<Integer> year, Pageable pageable) {
+        Page<HolidayEntity> holidayEntities = holidayJpaRepository.findByYearIn(year, pageable);
+        return holidayEntities.map(HolidayEntity::toHoliday);
     }
 
     @Override
-    public List<Holiday> findByCountryCodeIn(List<String> countryCode) {
-        List<HolidayEntity> holidayEntities = holidayJpaRepository.findByCountryCodeIn(countryCode);
-
-        return getHolidays(holidayEntities);
+    public Page<Holiday> findByCountryCodeIn(List<String> countryCode, Pageable pageable) {
+        Page<HolidayEntity> holidayEntities = holidayJpaRepository.findByCountryCodeIn(countryCode, pageable);
+        return holidayEntities.map(HolidayEntity::toHoliday);
     }
 
     @Override
-    public List<Holiday> findAll() {
-        List<HolidayEntity> holidayEntities = holidayJpaRepository.findAll();
-
-        return getHolidays(holidayEntities);
+    public Page<Holiday> findAll(Pageable pageable) {
+        Page<HolidayEntity> holidayEntities = holidayJpaRepository.findAll(pageable);
+        return holidayEntities.map(HolidayEntity::toHoliday);
     }
 
     private HolidayEntity saveHoliday(Holiday holiday) {
@@ -89,11 +87,5 @@ public class HolidayRepositoryImpl implements HolidayRepository {
                 .map(type -> new HolidayTypeEntity(savedHolidayEntity.getHolidayId(), type))
                 .toList();
         holidayTypeJpaRepository.saveAll(holidayTypeEntities);
-    }
-
-    private List<Holiday> getHolidays(List<HolidayEntity> holidayEntities) {
-        return holidayEntities.stream()
-                .map(HolidayEntity::toHoliday)
-                .toList();
     }
 }

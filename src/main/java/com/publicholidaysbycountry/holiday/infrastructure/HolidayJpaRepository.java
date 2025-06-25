@@ -2,12 +2,14 @@ package com.publicholidaysbycountry.holiday.infrastructure;
 
 import com.publicholidaysbycountry.holiday.infrastructure.entity.HolidayEntity;
 import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface HolidayJpaRepository extends JpaRepository<HolidayEntity, Long> {
-    List<HolidayEntity> findByYearInAndCountryCodeIn(List<Integer> year, List<String> countryCode);
+    Page<HolidayEntity> findByYearInAndCountryCodeIn(List<Integer> year, List<String> countryCode, Pageable pageable);
 
-    List<HolidayEntity> findByYearIn(List<Integer> year);
+    Page<HolidayEntity> findByYearIn(List<Integer> year, Pageable pageable);
 
-    List<HolidayEntity> findByCountryCodeIn(List<String> countryCode);
+    Page<HolidayEntity> findByCountryCodeIn(List<String> countryCode, Pageable pageable);
 }

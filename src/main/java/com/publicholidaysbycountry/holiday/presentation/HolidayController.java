@@ -12,6 +12,8 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import java.time.LocalDate;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -38,33 +40,40 @@ public class HolidayController {
                 "최근 " + Constants.YEAR_RANGE + "년 공휴일 " + savedHolidayCount + "개가 성공적으로 저장되었습니다.");
     }
 
-    @Operation(summary = "필터 기반 공휴일 조회", description = "연도별·국가별 필터 기반으로 공휴일을 조회합니다.")
+    @Operation(summary = "연도별·국가별 필터 기반 공휴일 조회", description = "연도별·국가별 필터 기반으로 공휴일을 페이징 처리하여 조회합니다.")
     @GetMapping
-    public CommonApiResponse<List<HolidayResponseDTO>> getHolidaysByFilter(@RequestParam(required = false) List<Integer> year,
-                                                        @RequestParam(required = false) List<String> countryCode) {
+    public CommonApiResponse<List<HolidayResponseDTO>> getHolidaysByFilter(
+            @RequestParam(required = false) List<Integer> year,
+            @RequestParam(required = false) List<String> countryCode,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
         boolean hasYear = hasYear(year);
-        boolean hasCountry = HasCountry(countryCode);
+        boolean hasCountry = hasCountry(countryCode);
 
-        List<HolidayResponseDTO> holidayResponseDTOs;
+        PageRequest pageRequest = PageRequest.of(page, size);
+        Page<HolidayResponseDTO> holidayPage;
 
         if (hasYear && hasCountry) {
-            holidayResponseDTOs = holidayService.getHolidaysByYearAndCountry(year, countryCode);
+            holidayPage = holidayService.getHolidaysByYearAndCountry(year, countryCode, pageRequest);
         } else if (hasYear) {
-            holidayResponseDTOs = holidayService.getHolidaysByYear(year);
+            holidayPage = holidayService.getHolidaysByYear(year, pageRequest);
         } else if (hasCountry) {
-            holidayResponseDTOs = holidayService.getHolidaysByCountry(countryCode);
+            holidayPage = holidayService.getHolidaysByCountry(countryCode, pageRequest);
         } else {
-            holidayResponseDTOs = holidayService.getAllHolidays();
+            holidayPage = holidayService.getAllHolidays(pageRequest);
         }
 
-        return CommonApiResponse.success(holidayResponseDTOs, "공휴일 " + holidayResponseDTOs.size() + "개가 조회되었습니다.");
+        return CommonApiResponse.success(
+                holidayPage.getContent(),
+                "총 " + holidayPage.getTotalElements() + "개 중 " + holidayPage.getNumberOfElements() + "개의 공휴일이 조회되었습니다."
+        );
     }
 
     private boolean hasYear(List<Integer> year) {
         return year != null && !year.isEmpty();
     }
 
-    private boolean HasCountry(List<String> countryCode) {
+    private boolean hasCountry(List<String> countryCode) {
         return countryCode != null && !countryCode.isEmpty();
     }
 

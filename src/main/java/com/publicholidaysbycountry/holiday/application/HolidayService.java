@@ -8,6 +8,8 @@ import com.publicholidaysbycountry.holiday.presentation.response.HolidayResponse
 import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -41,25 +43,26 @@ public class HolidayService {
     }
 
     @Transactional(readOnly = true)
-    public List<HolidayResponseDTO> getHolidaysByYearAndCountry(List<Integer> year, List<String> countryCode) {
-        List<Holiday> holidays = holidayRepository.findByYearAndCountryCode(year, countryCode);
-        return HolidayResponseDTO.fromHolidays(holidays);
+    public Page<HolidayResponseDTO> getHolidaysByYearAndCountry(List<Integer> year, List<String> countryCode, Pageable pageable) {
+        Page<Holiday> holidays = holidayRepository.findByYearAndCountryCode(year, countryCode, pageable);
+        return holidays.map(HolidayResponseDTO::fromHoliday);
     }
 
     @Transactional(readOnly = true)
-    public List<HolidayResponseDTO> getHolidaysByYear(List<Integer> year) {
-        List<Holiday> holidays = holidayRepository.findByYear(year);
-        return HolidayResponseDTO.fromHolidays(holidays);
+    public Page<HolidayResponseDTO> getHolidaysByYear(List<Integer> year, Pageable pageable) {
+        Page<Holiday> holidays = holidayRepository.findByYear(year, pageable);
+        return holidays.map(HolidayResponseDTO::fromHoliday);
     }
 
     @Transactional(readOnly = true)
-    public List<HolidayResponseDTO> getHolidaysByCountry(List<String> countryCode) {
-        List<Holiday> holidays = holidayRepository.findByCountryCodeIn(countryCode);
-        return HolidayResponseDTO.fromHolidays(holidays);
+    public Page<HolidayResponseDTO> getHolidaysByCountry(List<String> countryCode, Pageable pageable) {
+        Page<Holiday> holidays = holidayRepository.findByCountryCodeIn(countryCode, pageable);
+        return holidays.map(HolidayResponseDTO::fromHoliday);
     }
 
     @Transactional(readOnly = true)
-    public List<HolidayResponseDTO> getAllHolidays() {
-        return HolidayResponseDTO.fromHolidays(holidayRepository.findAll());
+    public Page<HolidayResponseDTO> getAllHolidays(Pageable pageable) {
+        return holidayRepository.findAll(pageable)
+                .map(HolidayResponseDTO::fromHoliday);
     }
 }

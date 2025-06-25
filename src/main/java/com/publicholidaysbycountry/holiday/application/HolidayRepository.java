@@ -2,17 +2,19 @@ package com.publicholidaysbycountry.holiday.application;
 
 import com.publicholidaysbycountry.holiday.domain.Holiday;
 import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 public interface HolidayRepository {
     int save(List<Holiday> holidays);
 
     void deleteAll();
 
-    List<Holiday> findByYearAndCountryCode(List<Integer> year, List<String> countryCode);
+    Page<Holiday> findByYearAndCountryCode(List<Integer> year, List<String> countryCode, Pageable pageable);
 
-    List<Holiday> findByYear(List<Integer> year);
+    Page<Holiday> findByYear(List<Integer> year, Pageable pageable);
 
-    List<Holiday> findByCountryCodeIn(List<String> countryCode);
+    Page<Holiday> findByCountryCodeIn(List<String> countryCode, Pageable pageable);
 
-    List<Holiday> findAll();
+    Page<Holiday> findAll(Pageable pageable);
 }
