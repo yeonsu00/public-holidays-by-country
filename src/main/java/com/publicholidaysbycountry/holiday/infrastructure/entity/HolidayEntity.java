@@ -23,7 +23,7 @@ public class HolidayEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long holidayId;
 
-    @Column(nullable = false)
+    @Column(name = "holiday_year", nullable = false)
     private Integer year;
 
     @Column(nullable = false)
