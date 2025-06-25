@@ -20,4 +20,19 @@ public enum HolidayType {
         this.typeName = typeName;
     }
 
+    @JsonValue
+    public String getTypeName() {
+        return typeName;
+    }
+
+    @JsonCreator
+    public static HolidayType from(String typeName) {
+        for (HolidayType type : values()) {
+            if (type.typeName.equalsIgnoreCase(typeName)) {
+                return type;
+            }
+        }
+        throw new InvalidHolidayTypeException(typeName + "에 해당하는 공휴일 타입을 찾을 수 없습니다.");
+    }
+
 }

@@ -32,4 +32,26 @@ public class Holiday {
         this.types = types;
     }
 
+    public static Holiday fromHolidayDTO(HolidayDTO holidayDTO) {
+        return Holiday.builder()
+                .date(holidayDTO.date())
+                .localName(holidayDTO.localName())
+                .name(holidayDTO.name())
+                .countryCode(holidayDTO.countryCode())
+                .fixed(holidayDTO.fixed())
+                .global(holidayDTO.global())
+                .counties(holidayDTO.counties())
+                .launchYear(holidayDTO.launchYear())
+                .types(holidayDTO.types())
+                .build();
+    }
+
+    public boolean hasCounties() {
+        return this.counties != null && !this.counties.isEmpty();
+    }
+
+    public boolean hasTypes() {
+        return this.types != null && !this.types.isEmpty();
+    }
+
 }
