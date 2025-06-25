@@ -20,7 +20,7 @@ public class Holiday {
 
     @Builder
     public Holiday(LocalDate date, String localName, String name, String countryCode, boolean fixed, boolean global,
-                   List<String> counties, int launchYear, List<HolidayType> types) {
+                   List<String> counties, Integer launchYear, List<HolidayType> types) {
         this.date = date;
         this.localName = localName;
         this.name = name;
