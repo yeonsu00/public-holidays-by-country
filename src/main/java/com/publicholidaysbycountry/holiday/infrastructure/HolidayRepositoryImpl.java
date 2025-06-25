@@ -53,6 +53,15 @@ public class HolidayRepositoryImpl implements HolidayRepository {
                 .toList();
     }
 
+    @Override
+    public List<Holiday> findByYear(List<Integer> year) {
+        List<HolidayEntity> holidayEntities = holidayJpaRepository.findByYearIn(year).orElseThrow();
+
+        return holidayEntities.stream()
+                .map(HolidayEntity::toHoliday)
+                .toList();
+    }
+
     private HolidayEntity saveHoliday(Holiday holiday) {
         HolidayEntity holidayEntity = HolidayEntity.fromHoliday(holiday);
         return holidayJpaRepository.save(holidayEntity);

@@ -9,4 +9,6 @@ public interface HolidayRepository {
     void deleteAll();
 
     List<Holiday> findByYearAndCountryCode(List<Integer> year, List<String> countryCode);
+
+    List<Holiday> findByYear(List<Integer> year);
 }

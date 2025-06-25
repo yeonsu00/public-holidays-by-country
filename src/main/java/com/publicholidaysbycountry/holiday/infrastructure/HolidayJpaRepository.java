@@ -7,4 +7,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface HolidayJpaRepository extends JpaRepository<HolidayEntity, Long> {
     Optional<List<HolidayEntity>> findByYearInAndCountryCodeIn(List<Integer> year, List<String> countryCode);
+
+    Optional<List<HolidayEntity>> findByYearIn(List<Integer> year);
 }

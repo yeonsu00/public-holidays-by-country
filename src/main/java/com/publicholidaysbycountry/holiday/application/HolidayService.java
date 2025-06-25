@@ -48,7 +48,8 @@ public class HolidayService {
 
     @Transactional(readOnly = true)
     public List<HolidayResponseDTO> getHolidaysByYear(List<Integer> year) {
-        return null;
+        List<Holiday> holidays = holidayRepository.findByYear(year);
+        return HolidayResponseDTO.fromHolidays(holidays);
     }
 
     @Transactional(readOnly = true)
