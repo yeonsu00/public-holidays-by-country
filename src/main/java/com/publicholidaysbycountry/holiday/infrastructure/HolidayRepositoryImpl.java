@@ -1,8 +1,5 @@
 package com.publicholidaysbycountry.holiday.infrastructure;
 
-import com.publicholidaysbycountry.country.infrastructure.CountryEntity;
-import com.publicholidaysbycountry.country.infrastructure.CountryJpaRepository;
-import com.publicholidaysbycountry.global.exception.CountryNotFoundException;
 import com.publicholidaysbycountry.holiday.application.HolidayRepository;
 import com.publicholidaysbycountry.holiday.domain.Holiday;
 import com.publicholidaysbycountry.holiday.infrastructure.entity.HolidayCountyEntity;
@@ -19,7 +16,6 @@ public class HolidayRepositoryImpl implements HolidayRepository {
     private final HolidayJpaRepository holidayJpaRepository;
     private final HolidayCountyJpaRepository holidayCountyJpaRepository;
     private final HolidayTypeJpaRepository holidayTypeJpaRepository;
-    private final CountryJpaRepository countryJpaRepository;
 
     @Override
     public int save(List<Holiday> holidays) {
@@ -49,18 +45,8 @@ public class HolidayRepositoryImpl implements HolidayRepository {
     }
 
     private HolidayEntity saveHoliday(Holiday holiday) {
-        Long countryId = getCountryIdByHolidayCountry(holiday);
-
-        HolidayEntity holidayEntity = HolidayEntity.fromHoliday(holiday, countryId);
+        HolidayEntity holidayEntity = HolidayEntity.fromHoliday(holiday);
         return holidayJpaRepository.save(holidayEntity);
-    }
-
-    private Long getCountryIdByHolidayCountry(Holiday holiday) {
-        CountryEntity countryEntity = countryJpaRepository.findByCode(holiday.getCountryCode())
-                .orElseThrow(() -> new CountryNotFoundException(
-                        "국가 코드 " + holiday.getCountryCode() + "에 해당하는 국가의 정보를 찾을 수 없습니다."));
-
-        return countryEntity.getCountryId();
     }
 
     private void saveHolidayCounties(Holiday holiday, HolidayEntity savedHolidayEntity) {
