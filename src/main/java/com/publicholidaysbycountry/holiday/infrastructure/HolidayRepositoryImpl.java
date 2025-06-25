@@ -46,21 +46,21 @@ public class HolidayRepositoryImpl implements HolidayRepository {
 
     @Override
     public List<Holiday> findByYearAndCountryCode(List<Integer> year, List<String> countryCode) {
-        List<HolidayEntity> holidayEntities = holidayJpaRepository.findByYearInAndCountryCodeIn(year, countryCode).orElseThrow();
+        List<HolidayEntity> holidayEntities = holidayJpaRepository.findByYearInAndCountryCodeIn(year, countryCode);
 
         return getHolidays(holidayEntities);
     }
 
     @Override
     public List<Holiday> findByYear(List<Integer> year) {
-        List<HolidayEntity> holidayEntities = holidayJpaRepository.findByYearIn(year).orElseThrow();
+        List<HolidayEntity> holidayEntities = holidayJpaRepository.findByYearIn(year);
 
         return getHolidays(holidayEntities);
     }
 
     @Override
     public List<Holiday> findByCountryCodeIn(List<String> countryCode) {
-        List<HolidayEntity> holidayEntities = holidayJpaRepository.findByCountryCodeIn(countryCode).orElseThrow();
+        List<HolidayEntity> holidayEntities = holidayJpaRepository.findByCountryCodeIn(countryCode);
 
         return getHolidays(holidayEntities);
     }
