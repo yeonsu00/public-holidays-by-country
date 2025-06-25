@@ -15,7 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class HolidayService {
 
     private final HolidayRepository holidayRepository;
-    private final PublicHolidayApiClient publicHolidayApiClient;
+    private final HolidayApiClient holidayApiClient;
 
     @Transactional
     public void saveHolidays(List<Country> countries, int currentYear) {
@@ -32,7 +32,7 @@ public class HolidayService {
 
         for (Country country : countries) {
             for (int year = currentYear; year >= currentYear - Constants.YEAR_RANGE; year--) {
-                holidayDTOs.addAll(List.of(publicHolidayApiClient.getHolidayApiRequest(country, year)));
+                holidayDTOs.addAll(List.of(holidayApiClient.getHolidayApiRequest(country, year)));
             }
         }
 

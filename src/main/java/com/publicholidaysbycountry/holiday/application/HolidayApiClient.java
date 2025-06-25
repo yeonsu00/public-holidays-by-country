@@ -10,7 +10,7 @@ import org.springframework.web.client.RestTemplate;
 
 @Service
 @RequiredArgsConstructor
-public class PublicHolidayApiClient {
+public class HolidayApiClient {
 
     private final RestTemplate restTemplate;
 
