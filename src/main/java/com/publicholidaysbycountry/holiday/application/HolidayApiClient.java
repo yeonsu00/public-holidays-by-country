@@ -25,7 +25,7 @@ public class HolidayApiClient {
         return countryHolidayDTOs;
     }
 
-    private static String getPublicHolidaysApiUrl(int year, String countryCode) {
+    private String getPublicHolidaysApiUrl(int year, String countryCode) {
         return Constants.PUBLIC_HOLIDAYS_API_URL + year + "/" + countryCode;
     }
 
