@@ -24,6 +24,9 @@ public class HolidayEntity {
     private Long holidayId;
 
     @Column(nullable = false)
+    private Integer year;
+
+    @Column(nullable = false)
     private LocalDate date;
 
     @Column(nullable = false)
@@ -33,7 +36,7 @@ public class HolidayEntity {
     private String name;
 
     @Column(nullable = false)
-    private Long countryId;
+    private String countryCode;
 
     @Column(nullable = false)
     private boolean fixed;
@@ -44,28 +47,42 @@ public class HolidayEntity {
     private Integer launchYear;
 
     @Builder
-    public HolidayEntity(Long holidayId, LocalDate date, String localName, String name, Long countryId, boolean fixed,
+    public HolidayEntity(Long holidayId, Integer year, LocalDate date, String localName, String name, String countryCode, boolean fixed,
                          boolean global, Integer launchYear) {
         this.holidayId = holidayId;
+        this.year = year;
         this.date = date;
         this.localName = localName;
         this.name = name;
-        this.countryId = countryId;
+        this.countryCode = countryCode;
         this.fixed = fixed;
         this.global = global;
         this.launchYear = launchYear;
     }
 
-    public static HolidayEntity fromHoliday(Holiday holiday, Long countryId) {
+    public static HolidayEntity fromHoliday(Holiday holiday) {
         return HolidayEntity.builder()
+                .year(holiday.getDate().getYear())
                 .date(holiday.getDate())
                 .localName(holiday.getLocalName())
                 .name(holiday.getName())
-                .countryId(countryId)
+                .countryCode(holiday.getCountryCode())
                 .fixed(holiday.isFixed())
                 .global(holiday.isGlobal())
                 .launchYear(holiday.getLaunchYear())
                 .build();
 
+    }
+
+    public Holiday toHoliday() {
+        return Holiday.builder()
+                .date(this.date)
+                .localName(this.localName)
+                .name(this.name)
+                .countryCode(this.countryCode)
+                .fixed(this.fixed)
+                .global(this.global)
+                .launchYear(this.launchYear)
+                .build();
     }
 }
