@@ -7,4 +7,6 @@ public interface HolidayRepository {
     int save(List<Holiday> holidays);
 
     void deleteAll();
+
+    List<Holiday> findByYearAndCountryCode(List<Integer> year, List<String> countryCode);
 }

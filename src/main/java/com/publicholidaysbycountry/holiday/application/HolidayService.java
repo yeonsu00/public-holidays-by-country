@@ -4,6 +4,7 @@ import com.publicholidaysbycountry.country.domain.Country;
 import com.publicholidaysbycountry.global.Constants;
 import com.publicholidaysbycountry.holiday.application.dto.HolidayDTO;
 import com.publicholidaysbycountry.holiday.domain.Holiday;
+import com.publicholidaysbycountry.holiday.presentation.response.HolidayResponseDTO;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -39,4 +40,24 @@ public class HolidayService {
         return HolidayDTO.toHolidays(holidayDTOs);
     }
 
+    @Transactional(readOnly = true)
+    public List<HolidayResponseDTO> getHolidaysByYearAndCountry(List<Integer> year, List<String> countryCode) {
+        List<Holiday> holidays = holidayRepository.findByYearAndCountryCode(year, countryCode);
+        return HolidayResponseDTO.fromHolidays(holidays);
+    }
+
+    @Transactional(readOnly = true)
+    public List<HolidayResponseDTO> getHolidaysByYear(List<Integer> year) {
+        return null;
+    }
+
+    @Transactional(readOnly = true)
+    public List<HolidayResponseDTO> getHolidaysByCountry(List<String> countryCode) {
+        return null;
+    }
+
+    @Transactional(readOnly = true)
+    public List<HolidayResponseDTO> getAllHolidays() {
+        return null;
+    }
 }

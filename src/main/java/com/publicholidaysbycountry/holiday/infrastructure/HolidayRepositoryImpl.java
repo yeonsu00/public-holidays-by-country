@@ -44,6 +44,15 @@ public class HolidayRepositoryImpl implements HolidayRepository {
         holidayJpaRepository.deleteAllInBatch();
     }
 
+    @Override
+    public List<Holiday> findByYearAndCountryCode(List<Integer> year, List<String> countryCode) {
+        List<HolidayEntity> holidayEntities = holidayJpaRepository.findByYearInAndCountryCodeIn(year, countryCode).orElseThrow();
+
+        return holidayEntities.stream()
+                .map(HolidayEntity::toHoliday)
+                .toList();
+    }
+
     private HolidayEntity saveHoliday(Holiday holiday) {
         HolidayEntity holidayEntity = HolidayEntity.fromHoliday(holiday);
         return holidayJpaRepository.save(holidayEntity);
