@@ -23,4 +23,9 @@ public class CountryRepositoryImpl implements CountryRepository {
                 .map(CountryEntity::toCountry)
                 .toList();
     }
+
+    @Override
+    public void deleteAll() {
+        countryJpaRepository.deleteAllInBatch();
+    }
 }

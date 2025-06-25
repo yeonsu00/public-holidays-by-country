@@ -32,4 +32,8 @@ public class CountryService {
 
         return List.of(countryDTOS);
     }
+
+    public void deleteAllCountries() {
+        countryRepository.deleteAll();
+    }
 }

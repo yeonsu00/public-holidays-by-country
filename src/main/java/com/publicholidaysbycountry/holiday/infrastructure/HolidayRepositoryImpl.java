@@ -36,6 +36,13 @@ public class HolidayRepositoryImpl implements HolidayRepository {
         }
     }
 
+    @Override
+    public void deleteAll() {
+        holidayTypeJpaRepository.deleteAllInBatch();
+        holidayCountyJpaRepository.deleteAllInBatch();
+        holidayJpaRepository.deleteAllInBatch();
+    }
+
     private HolidayEntity saveHoliday(Holiday holiday) {
         Long countryId = getCountryIdByHolidayCountry(holiday);
 

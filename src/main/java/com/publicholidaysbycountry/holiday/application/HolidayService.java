@@ -23,6 +23,10 @@ public class HolidayService {
         holidayRepository.save(holidays);
     }
 
+    public void deleteAllHolidays() {
+        holidayRepository.deleteAll();
+    }
+
     private List<Holiday> getApiRequest(List<Country> countries, int currentYear) {
         List<HolidayDTO> holidayDTOs = new ArrayList<>();
 
