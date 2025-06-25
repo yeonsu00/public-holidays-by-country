@@ -13,7 +13,7 @@ public record HolidayDTO(
     boolean fixed,
     boolean global,
     List<String> counties,
-    int launchYear,
+    Integer launchYear,
     List<HolidayType> types
 ) {
 

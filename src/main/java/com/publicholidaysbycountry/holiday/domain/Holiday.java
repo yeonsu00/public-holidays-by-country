@@ -15,7 +15,7 @@ public class Holiday {
     private boolean fixed;
     private boolean global;
     private List<String> counties;
-    private int launchYear;
+    private Integer launchYear;
     private List<HolidayType> types;
 
     @Builder
