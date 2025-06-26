@@ -84,14 +84,14 @@ public class HolidayRepositoryImpl implements HolidayRepository {
 
     private void saveHolidayCounties(Holiday holiday, HolidayEntity savedHolidayEntity) {
         List<HolidayCountyEntity> countyEntities = holiday.getCounties().stream()
-                .map(countyName -> new HolidayCountyEntity(countyName, savedHolidayEntity.getHolidayId()))
+                .map(countyName -> new HolidayCountyEntity(countyName, savedHolidayEntity))
                 .toList();
         holidayCountyJpaRepository.saveAll(countyEntities);
     }
 
     private void saveHolidayTypes(Holiday holiday, HolidayEntity savedHolidayEntity) {
         List<HolidayTypeEntity> holidayTypeEntities = holiday.getTypes().stream()
-                .map(type -> new HolidayTypeEntity(savedHolidayEntity.getHolidayId(), type))
+                .map(type -> new HolidayTypeEntity(savedHolidayEntity, type))
                 .toList();
         holidayTypeJpaRepository.saveAll(holidayTypeEntities);
     }

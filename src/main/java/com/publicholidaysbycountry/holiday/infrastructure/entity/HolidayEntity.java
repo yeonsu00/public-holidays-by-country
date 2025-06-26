@@ -3,11 +3,16 @@ package com.publicholidaysbycountry.holiday.infrastructure.entity;
 import com.publicholidaysbycountry.holiday.domain.Holiday;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import java.time.LocalDate;
+import java.util.List;
+import java.util.Optional;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -46,8 +51,17 @@ public class HolidayEntity {
 
     private Integer launchYear;
 
+    @OneToMany(fetch = FetchType.LAZY)
+    @JoinColumn(name = "holidayId", referencedColumnName = "holidayId")
+    private List<HolidayCountyEntity> counties;
+
+    @OneToMany(fetch = FetchType.LAZY)
+    @JoinColumn(name = "holidayId", referencedColumnName = "holidayId")
+    private List<HolidayTypeEntity> types;
+
     @Builder
-    public HolidayEntity(Long holidayId, Integer year, LocalDate date, String localName, String name, String countryCode, boolean fixed,
+    public HolidayEntity(Long holidayId, Integer year, LocalDate date, String localName, String name,
+                         String countryCode, boolean fixed,
                          boolean global, Integer launchYear) {
         this.holidayId = holidayId;
         this.year = year;
@@ -83,6 +97,20 @@ public class HolidayEntity {
                 .fixed(this.fixed)
                 .global(this.global)
                 .launchYear(this.launchYear)
+                .counties(
+                        Optional.ofNullable(this.counties)
+                                .orElseGet(List::of)
+                                .stream()
+                                .map(HolidayCountyEntity::getCountyName)
+                                .toList()
+                )
+                .types(
+                        Optional.ofNullable(this.types)
+                                .orElseGet(List::of)
+                                .stream()
+                                .map(HolidayTypeEntity::getType)
+                                .toList()
+                )
                 .build();
     }
 }
