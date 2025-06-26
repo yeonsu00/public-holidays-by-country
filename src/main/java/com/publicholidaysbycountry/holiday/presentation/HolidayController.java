@@ -6,15 +6,20 @@ import com.publicholidaysbycountry.global.Constants;
 import com.publicholidaysbycountry.global.response.CommonApiResponse;
 import com.publicholidaysbycountry.holiday.application.HolidayInitializationFacade;
 import com.publicholidaysbycountry.holiday.application.HolidayService;
+import com.publicholidaysbycountry.holiday.presentation.request.YearAndCountryFilterRequest;
 import com.publicholidaysbycountry.holiday.presentation.response.HolidayResponseDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import java.time.LocalDate;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -43,10 +48,12 @@ public class HolidayController {
     @Operation(summary = "연도별·국가별 필터 기반 공휴일 조회", description = "연도별·국가별 필터 기반으로 공휴일을 페이징 처리하여 조회합니다.")
     @GetMapping
     public CommonApiResponse<List<HolidayResponseDTO>> getHolidaysByFilter(
-            @RequestParam(required = false) List<Integer> year,
-            @RequestParam(required = false) List<String> countryCode,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size) {
+            @Validated @ModelAttribute YearAndCountryFilterRequest request) {
+        List<Integer> year = request.getYear();
+        List<String> countryCode = request.getCountryCode();
+        int page = request.getPageOrDefault();
+        int size = request.getSizeOrDefault();
+
         boolean hasYear = hasYear(year);
         boolean hasCountry = hasCountry(countryCode);
 
