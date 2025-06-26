@@ -68,10 +68,7 @@ public class HolidayController {
             holidayPage = holidayService.getAllHolidays(pageRequest);
         }
 
-        return CommonApiResponse.success(
-                holidayPage.getContent(),
-                "총 " + holidayPage.getTotalElements() + "개 중 " + holidayPage.getNumberOfElements() + "개의 공휴일이 조회되었습니다."
-        );
+        return getHolidaysCommonApiResponse(holidayPage);
     }
 
     @Operation(summary = "기간별 필터 기반 공휴일 조회", description = "기간별 필터 기반으로 공휴일을 페이징 처리하여 조회합니다.")
@@ -83,6 +80,11 @@ public class HolidayController {
                 request.getFrom(), request.getTo(), pageRequest
         );
 
+        return getHolidaysCommonApiResponse(holidayPage);
+    }
+
+    private CommonApiResponse<List<HolidayResponseDTO>> getHolidaysCommonApiResponse(
+            Page<HolidayResponseDTO> holidayPage) {
         return CommonApiResponse.success(
                 holidayPage.getContent(),
                 "총 " + holidayPage.getTotalElements() + "개 중 " + holidayPage.getNumberOfElements() + "개의 공휴일이 조회되었습니다."
