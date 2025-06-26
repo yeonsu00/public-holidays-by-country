@@ -5,6 +5,7 @@ import com.publicholidaysbycountry.holiday.domain.Holiday;
 import com.publicholidaysbycountry.holiday.infrastructure.entity.HolidayCountyEntity;
 import com.publicholidaysbycountry.holiday.infrastructure.entity.HolidayEntity;
 import com.publicholidaysbycountry.holiday.infrastructure.entity.HolidayTypeEntity;
+import java.time.LocalDate;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -67,6 +68,12 @@ public class HolidayRepositoryImpl implements HolidayRepository {
     @Override
     public Page<Holiday> findAll(Pageable pageable) {
         Page<HolidayEntity> holidayEntities = holidayJpaRepository.findAll(pageable);
+        return holidayEntities.map(HolidayEntity::toHoliday);
+    }
+
+    @Override
+    public Page<Holiday> findByDateBetween(LocalDate from, LocalDate to, Pageable pageable) {
+        Page<HolidayEntity> holidayEntities = holidayJpaRepository.findByDateBetween(from, to, pageable);
         return holidayEntities.map(HolidayEntity::toHoliday);
     }
 

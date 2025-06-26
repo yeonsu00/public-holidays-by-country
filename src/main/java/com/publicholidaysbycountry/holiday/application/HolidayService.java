@@ -5,6 +5,7 @@ import com.publicholidaysbycountry.global.Constants;
 import com.publicholidaysbycountry.holiday.application.dto.HolidayDTO;
 import com.publicholidaysbycountry.holiday.domain.Holiday;
 import com.publicholidaysbycountry.holiday.presentation.response.HolidayResponseDTO;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -64,5 +65,11 @@ public class HolidayService {
     public Page<HolidayResponseDTO> getAllHolidays(Pageable pageable) {
         return holidayRepository.findAll(pageable)
                 .map(HolidayResponseDTO::fromHoliday);
+    }
+
+    @Transactional(readOnly = true)
+    public Page<HolidayResponseDTO> getHolidaysByDate(LocalDate from, LocalDate to, Pageable pageable) {
+        Page<Holiday> holidays = holidayRepository.findByDateBetween(from, to, pageable);
+        return holidays.map(HolidayResponseDTO::fromHoliday);
     }
 }

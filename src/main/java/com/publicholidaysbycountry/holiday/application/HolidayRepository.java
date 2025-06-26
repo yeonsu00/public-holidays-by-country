@@ -1,6 +1,7 @@
 package com.publicholidaysbycountry.holiday.application;
 
 import com.publicholidaysbycountry.holiday.domain.Holiday;
+import java.time.LocalDate;
 import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -17,4 +18,6 @@ public interface HolidayRepository {
     Page<Holiday> findByCountryCodeIn(List<String> countryCode, Pageable pageable);
 
     Page<Holiday> findAll(Pageable pageable);
+
+    Page<Holiday> findByDateBetween(LocalDate from, LocalDate to, Pageable pageable);
 }
