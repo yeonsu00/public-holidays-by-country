@@ -6,7 +6,7 @@ import com.publicholidaysbycountry.global.Constants;
 import com.publicholidaysbycountry.global.response.CommonApiResponse;
 import com.publicholidaysbycountry.holiday.application.HolidayInitializationFacade;
 import com.publicholidaysbycountry.holiday.application.HolidayService;
-import com.publicholidaysbycountry.holiday.presentation.request.DateFilterRequest;
+import com.publicholidaysbycountry.holiday.presentation.request.FilterRequest;
 import com.publicholidaysbycountry.holiday.presentation.request.YearAndCountryFilterRequest;
 import com.publicholidaysbycountry.holiday.presentation.response.HolidayResponseDTO;
 import io.swagger.v3.oas.annotations.Operation;
@@ -71,13 +71,15 @@ public class HolidayController {
         return getHolidaysCommonApiResponse(holidayPage);
     }
 
-    @Operation(summary = "기간별 필터 기반 공휴일 조회", description = "기간별 필터 기반으로 공휴일을 페이징 처리하여 조회합니다.")
-    @GetMapping("/date")
-    public CommonApiResponse<List<HolidayResponseDTO>> getHolidaysByDate(
-            @Validated @ModelAttribute DateFilterRequest request) {
+    @Operation(summary = "필터 기반 공휴일 조회", description = "date, type, county, fixed, global, launchYear, countryCode별 필터 기반으로 공휴일을 페이징 처리하여 조회합니다.")
+    @GetMapping("/filter")
+    public CommonApiResponse<List<HolidayResponseDTO>> getHolidaysByFilter(
+            @Validated @ModelAttribute FilterRequest request) {
         PageRequest pageRequest = PageRequest.of(request.getPageOrDefault(), request.getSizeOrDefault());
-        Page<HolidayResponseDTO> holidayPage = holidayService.getHolidaysByDate(
-                request.getFrom(), request.getTo(), pageRequest
+
+        Page<HolidayResponseDTO> holidayPage = holidayService.getHolidaysByFilter(
+                request.getFrom(), request.getTo(), request.getType(), request.getHasCounty(), request.getFixed(),
+                request.getGlobal(), request.getLaunchYear(), request.getCountryCode(), pageRequest
         );
 
         return getHolidaysCommonApiResponse(holidayPage);

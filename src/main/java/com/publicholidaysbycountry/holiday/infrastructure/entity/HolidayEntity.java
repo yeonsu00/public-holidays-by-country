@@ -11,8 +11,8 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import java.time.LocalDate;
-import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -53,11 +53,11 @@ public class HolidayEntity {
 
     @OneToMany(fetch = FetchType.LAZY)
     @JoinColumn(name = "holidayId", referencedColumnName = "holidayId")
-    private List<HolidayCountyEntity> counties;
+    private Set<HolidayCountyEntity> counties;
 
     @OneToMany(fetch = FetchType.LAZY)
     @JoinColumn(name = "holidayId", referencedColumnName = "holidayId")
-    private List<HolidayTypeEntity> types;
+    private Set<HolidayTypeEntity> types;
 
     @Builder
     public HolidayEntity(Long holidayId, Integer year, LocalDate date, String localName, String name,
@@ -99,14 +99,14 @@ public class HolidayEntity {
                 .launchYear(this.launchYear)
                 .counties(
                         Optional.ofNullable(this.counties)
-                                .orElseGet(List::of)
+                                .orElseGet(Set::of)
                                 .stream()
                                 .map(HolidayCountyEntity::getCountyName)
                                 .toList()
                 )
                 .types(
                         Optional.ofNullable(this.types)
-                                .orElseGet(List::of)
+                                .orElseGet(Set::of)
                                 .stream()
                                 .map(HolidayTypeEntity::getType)
                                 .toList()

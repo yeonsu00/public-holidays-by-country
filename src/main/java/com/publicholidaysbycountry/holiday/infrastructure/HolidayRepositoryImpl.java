@@ -2,6 +2,7 @@ package com.publicholidaysbycountry.holiday.infrastructure;
 
 import com.publicholidaysbycountry.holiday.application.HolidayRepository;
 import com.publicholidaysbycountry.holiday.domain.Holiday;
+import com.publicholidaysbycountry.holiday.domain.HolidayType;
 import com.publicholidaysbycountry.holiday.infrastructure.entity.HolidayCountyEntity;
 import com.publicholidaysbycountry.holiday.infrastructure.entity.HolidayEntity;
 import com.publicholidaysbycountry.holiday.infrastructure.entity.HolidayTypeEntity;
@@ -19,6 +20,7 @@ public class HolidayRepositoryImpl implements HolidayRepository {
     private final HolidayJpaRepository holidayJpaRepository;
     private final HolidayCountyJpaRepository holidayCountyJpaRepository;
     private final HolidayTypeJpaRepository holidayTypeJpaRepository;
+    private final HolidayQueryRepository holidayQueryRepository;
 
     @Override
     public int save(List<Holiday> holidays) {
@@ -49,7 +51,8 @@ public class HolidayRepositoryImpl implements HolidayRepository {
 
     @Override
     public Page<Holiday> findByYearAndCountryCode(List<Integer> year, List<String> countryCode, Pageable pageable) {
-        Page<HolidayEntity> holidayEntities = holidayJpaRepository.findByYearInAndCountryCodeIn(year, countryCode, pageable);
+        Page<HolidayEntity> holidayEntities = holidayJpaRepository.findByYearInAndCountryCodeIn(year, countryCode,
+                pageable);
         return holidayEntities.map(HolidayEntity::toHoliday);
     }
 
@@ -72,8 +75,11 @@ public class HolidayRepositoryImpl implements HolidayRepository {
     }
 
     @Override
-    public Page<Holiday> findByDateBetween(LocalDate from, LocalDate to, Pageable pageable) {
-        Page<HolidayEntity> holidayEntities = holidayJpaRepository.findByDateBetween(from, to, pageable);
+    public Page<Holiday> findAllByFilter(LocalDate from, LocalDate to, List<HolidayType> types, Boolean hasCounty,
+                                         Boolean fixed, Boolean global, Integer launchYear, List<String> countryCode,
+                                         Pageable pageable) {
+        Page<HolidayEntity> holidayEntities = holidayQueryRepository.findAllByFilter(from, to, types, hasCounty, fixed,
+                global, launchYear, countryCode, pageable);
         return holidayEntities.map(HolidayEntity::toHoliday);
     }
 
