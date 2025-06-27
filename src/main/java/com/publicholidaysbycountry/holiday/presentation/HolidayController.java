@@ -16,6 +16,7 @@ import jakarta.validation.Valid;
 import java.time.LocalDate;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -31,6 +32,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 @RequestMapping("/holidays")
 @Tag(name = "Holiday", description = "Holiday API")
+@Slf4j
 public class HolidayController {
 
     private final CountryService countryService;
@@ -41,8 +43,14 @@ public class HolidayController {
     @PostMapping
     public CommonApiResponse<String> saveHolidaysByCountryAndYear() {
         holidayInitializationFacade.deleteAllHolidaysAndCountries();
+        log.info("공휴일 데이터 초기화 완료, 국가별 공휴일 저장 시작");
+
         List<Country> countries = countryService.saveCountries();
+        log.info("국가 데이터 저장 완료: 국가 {}개 저장", countries.size());
+
         int savedHolidayCount = holidayService.saveHolidays(countries, LocalDate.now().getYear());
+        log.info("공휴일 데이터 저장 완료: 공휴일 {}개 저장", savedHolidayCount);
+
         return CommonApiResponse.success(
                 "최근 " + Constants.YEAR_RANGE + "년 공휴일 " + savedHolidayCount + "개가 성공적으로 저장되었습니다.");
     }
@@ -63,12 +71,16 @@ public class HolidayController {
         Page<HolidayResponseDTO> holidayPage;
 
         if (hasYear && hasCountry) {
+            log.info("연도와 국가 코드가 모두 제공되었습니다. 연도: {}, 국가 코드: {}", year, countryCode);
             holidayPage = holidayService.getHolidaysByYearAndCountry(year, countryCode, pageRequest);
         } else if (hasYear) {
+            log.info("연도만 제공되었습니다. 연도: {}", year);
             holidayPage = holidayService.getHolidaysByYear(year, pageRequest);
         } else if (hasCountry) {
+            log.info("국가 코드만 제공되었습니다. 국가 코드: {}", countryCode);
             holidayPage = holidayService.getHolidaysByCountry(countryCode, pageRequest);
         } else {
+            log.info("연도와 국가 코드가 모두 제공되지 않았습니다. 전체 공휴일 조회");
             holidayPage = holidayService.getAllHolidays(pageRequest);
         }
 
@@ -79,6 +91,10 @@ public class HolidayController {
     @GetMapping("/filter")
     public CommonApiResponse<List<HolidayResponseDTO>> getHolidaysByFilter(
             @Valid @ModelAttribute FilterRequest request) {
+        log.info("공휴일 필터 조건: from={}, to={}, type={}, hasCounty={}, fixed={}, global={}, launchYear={}, countryCode={}",
+                request.getFrom(), request.getTo(), request.getType(), request.getHasCounty(), request.getFixed(),
+                request.getGlobal(), request.getLaunchYear(), request.getCountryCode());
+
         PageRequest pageRequest = PageRequest.of(request.getPageOrDefault(), request.getSizeOrDefault());
 
         Page<HolidayResponseDTO> holidayPage = holidayService.getHolidaysByFilter(
@@ -93,6 +109,7 @@ public class HolidayController {
     @PatchMapping
     public CommonApiResponse<String> refreshHolidaysByYearAndCountry(
             @Valid @RequestBody HolidayYearAndCountryCodeRequest request) {
+        log.info("공휴일 재동기화 요청: 연도={}, 국가 코드={}", request.getYear(), request.getCountryCode());
         Country country = countryService.getCountryByCode(request.getCountryCode());
         int upsertedHolidayCount = holidayService.refreshHolidaysByYearAndCountry(request.getYear(), country);
 
@@ -103,6 +120,7 @@ public class HolidayController {
     @DeleteMapping
     public CommonApiResponse<String> deleteHolidaysByYearAndCountry(
             @Valid @RequestBody HolidayYearAndCountryCodeRequest request) {
+        log.info("공휴일 삭제 요청: 연도={}, 국가 코드={}", request.getYear(), request.getCountryCode());
         Country country = countryService.getCountryByCode(request.getCountryCode());
         int deletedHolidayCount = holidayService.deleteHolidaysByYearAndCountry(request.getYear(), country);
 

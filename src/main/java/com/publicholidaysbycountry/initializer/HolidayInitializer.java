@@ -22,6 +22,7 @@ public class HolidayInitializer {
     @EventListener(ApplicationReadyEvent.class)
     public void initializeHolidays() {
         List<Country> countries = countryService.saveCountries();
+        log.info("국가 데이터 일괄 적재 완료: 국가 {}개 저장", countries.size());
         int savedHolidayCount = holidayService.saveHolidays(countries, LocalDate.now().getYear());
         log.info("공휴일 데이터 일괄 적재 완료: 공휴일 {}개 저장", savedHolidayCount);
     }
