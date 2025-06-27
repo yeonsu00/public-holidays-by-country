@@ -3,6 +3,7 @@ package com.publicholidaysbycountry.holiday.domain;
 import com.publicholidaysbycountry.holiday.application.dto.HolidayDTO;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.stream.Collectors;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -17,10 +18,11 @@ public class Holiday {
     private List<String> counties;
     private Integer launchYear;
     private List<HolidayType> types;
+    private String countiesKey;
 
     @Builder
     public Holiday(LocalDate date, String localName, String name, String countryCode, boolean fixed, boolean global,
-                   List<String> counties, Integer launchYear, List<HolidayType> types) {
+                   List<String> counties, Integer launchYear, List<HolidayType> types, String countiesKey) {
         this.date = date;
         this.localName = localName;
         this.name = name;
@@ -30,6 +32,7 @@ public class Holiday {
         this.counties = counties;
         this.launchYear = launchYear;
         this.types = types;
+        this.countiesKey = countiesKey;
     }
 
     public static Holiday fromHolidayDTO(HolidayDTO holidayDTO) {
@@ -43,6 +46,7 @@ public class Holiday {
                 .counties(holidayDTO.counties())
                 .launchYear(holidayDTO.launchYear())
                 .types(holidayDTO.types())
+                .countiesKey(createCountiesKey(holidayDTO.counties()))
                 .build();
     }
 
@@ -52,6 +56,16 @@ public class Holiday {
 
     public boolean hasTypes() {
         return this.types != null && !this.types.isEmpty();
+    }
+
+    private static String createCountiesKey(List<String> counties) {
+        if (counties == null || counties.isEmpty()) {
+            return "";
+        }
+
+        return counties.stream()
+                .sorted()
+                .collect(Collectors.joining(","));
     }
 
 }
