@@ -1,13 +1,13 @@
 package com.publicholidaysbycountry.holiday.infrastructure.entity;
 
 import com.publicholidaysbycountry.holiday.domain.Holiday;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
@@ -63,12 +63,20 @@ public class HolidayEntity {
     @Column(nullable = false)
     private String countiesKey;
 
-    @OneToMany(fetch = FetchType.LAZY)
-    @JoinColumn(name = "holidayId", referencedColumnName = "holidayId")
+    @OneToMany(
+            mappedBy = "holiday",
+            fetch = FetchType.LAZY,
+            cascade = CascadeType.ALL,
+            orphanRemoval = true
+    )
     private Set<HolidayCountyEntity> counties;
 
-    @OneToMany(fetch = FetchType.LAZY)
-    @JoinColumn(name = "holidayId", referencedColumnName = "holidayId")
+    @OneToMany(
+            mappedBy = "holiday",
+            fetch = FetchType.LAZY,
+            cascade = CascadeType.ALL,
+            orphanRemoval = true
+    )
     private Set<HolidayTypeEntity> types;
 
     @Builder

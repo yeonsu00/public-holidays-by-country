@@ -12,4 +12,6 @@ public interface HolidayJpaRepository extends JpaRepository<HolidayEntity, Long>
     Page<HolidayEntity> findByYearIn(List<Integer> year, Pageable pageable);
 
     Page<HolidayEntity> findByCountryCodeIn(List<String> countryCode, Pageable pageable);
+
+    int deleteByYearAndCountryCode(Integer year, String code);
 }

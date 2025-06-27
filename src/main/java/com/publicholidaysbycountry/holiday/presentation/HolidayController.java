@@ -18,6 +18,7 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -96,6 +97,16 @@ public class HolidayController {
         int upsertedHolidayCount = holidayService.refreshHolidaysByYearAndCountry(request.getYear(), country);
 
         return CommonApiResponse.success(upsertedHolidayCount + "개의 공휴일이 재동기화되었습니다.");
+    }
+
+    @Operation(summary = "연도·국가별 공휴일 삭제", description = "연도와 국가를 기준으로 공휴일을 삭제합니다.")
+    @DeleteMapping
+    public CommonApiResponse<String> deleteHolidaysByYearAndCountry(
+            @Valid @RequestBody RefreshHolidayRequest request) {
+        Country country = countryService.getCountryByCode(request.getCountryCode());
+        int deletedHolidayCount = holidayService.deleteHolidaysByYearAndCountry(request.getYear(), country);
+
+        return CommonApiResponse.success(deletedHolidayCount + "개의 공휴일이 삭제되었습니다.");
     }
 
     private CommonApiResponse<List<HolidayResponseDTO>> getHolidaysCommonApiResponse(
