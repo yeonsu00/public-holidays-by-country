@@ -21,6 +21,7 @@ public class HolidayRepositoryImpl implements HolidayRepository {
     private final HolidayCountyJpaRepository holidayCountyJpaRepository;
     private final HolidayTypeJpaRepository holidayTypeJpaRepository;
     private final HolidayQueryRepository holidayQueryRepository;
+    private final HolidayJdbcRepository holidayJdbcRepository;
 
     @Override
     public int save(List<Holiday> holidays) {
@@ -81,6 +82,11 @@ public class HolidayRepositoryImpl implements HolidayRepository {
         Page<HolidayEntity> holidayEntities = holidayQueryRepository.findAllByFilter(from, to, types, hasCounty, fixed,
                 global, launchYear, countryCode, pageable);
         return holidayEntities.map(HolidayEntity::toHoliday);
+    }
+
+    @Override
+    public int upsertWithCountiesAndTypes(List<Holiday> newHolidays) {
+        return holidayJdbcRepository.upsertWithCountiesAndTypes(newHolidays);
     }
 
     @Override

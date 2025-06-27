@@ -25,4 +25,6 @@ public interface HolidayRepository {
                                   Boolean global, Integer launchYear, List<String> countryCode, Pageable pageable);
 
     int deleteByYearAndCountryCode(Integer year, String code);
+
+    int upsertWithCountiesAndTypes(List<Holiday> newHolidays);
 }
