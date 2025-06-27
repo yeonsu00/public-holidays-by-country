@@ -8,10 +8,13 @@ import com.publicholidaysbycountry.holiday.domain.Holiday;
 import com.publicholidaysbycountry.holiday.domain.HolidayType;
 import com.publicholidaysbycountry.holiday.presentation.response.HolidayResponseDTO;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -24,6 +27,7 @@ public class HolidayService {
 
     private final HolidayRepository holidayRepository;
     private final HolidayApiClient holidayApiClient;
+    private final HolidayAsyncService holidayAsyncService;
 
     @Transactional
     public int saveHolidays(List<Country> countries, int currentYear) {
@@ -86,14 +90,21 @@ public class HolidayService {
         return holidayRepository.deleteByYearAndCountryCode(year, country.getCode());
     }
 
-    private List<Holiday> getHolidaysFromApiByCountryAndYear(List<Country> countries, int currentYear) {
-        Set<HolidayDTO> holidayDTOs = new HashSet<>();
+    public List<Holiday> getHolidaysFromApiByCountryAndYear(List<Country> countries, int currentYear) {
+        List<CompletableFuture<List<HolidayDTO>>> futures = new ArrayList<>();
 
         for (Country country : countries) {
             for (int year = currentYear; year >= currentYear - Constants.YEAR_RANGE; year--) {
-                holidayDTOs.addAll(List.of(holidayApiClient.getHolidayApiRequest(country, year)));
+                futures.add(holidayAsyncService.getHolidaysAsync(country, year));
             }
         }
+
+        CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();
+
+        Set<HolidayDTO> holidayDTOs = futures.stream()
+                .map(CompletableFuture::join)
+                .flatMap(List::stream)
+                .collect(Collectors.toSet());
 
         return HolidayDTO.toHolidays(holidayDTOs);
     }
