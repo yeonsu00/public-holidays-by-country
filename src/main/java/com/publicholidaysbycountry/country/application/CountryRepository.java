@@ -8,4 +8,6 @@ public interface CountryRepository {
     List<Country> saveAll(List<Country> countries);
 
     void deleteAll();
+
+    Country findByCode(String countryCode);
 }

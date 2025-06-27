@@ -25,4 +25,9 @@ public class CountryService {
     public void deleteAllCountries() {
         countryRepository.deleteAll();
     }
+
+    @Transactional(readOnly = true)
+    public Country getCountryByCode(String countryCode) {
+        return countryRepository.findByCode(countryCode);
+    }
 }
