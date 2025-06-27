@@ -83,6 +83,11 @@ public class HolidayService {
         return holidayJdbcRepository.upsertWithCountiesAndTypes(newHolidays);
     }
 
+    @Transactional
+    public int deleteHolidaysByYearAndCountry(Integer year, Country country) {
+        return holidayRepository.deleteByYearAndCountryCode(year, country.getCode());
+    }
+
     private List<Holiday> getHolidaysByCountryAndYear(List<Country> countries, int currentYear) {
         Set<HolidayDTO> holidayDTOs = new HashSet<>();
 

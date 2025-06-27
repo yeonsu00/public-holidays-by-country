@@ -83,6 +83,11 @@ public class HolidayRepositoryImpl implements HolidayRepository {
         return holidayEntities.map(HolidayEntity::toHoliday);
     }
 
+    @Override
+    public int deleteByYearAndCountryCode(Integer year, String code) {
+        return holidayJpaRepository.deleteByYearAndCountryCode(year, code);
+    }
+
     private HolidayEntity saveHoliday(Holiday holiday) {
         HolidayEntity holidayEntity = HolidayEntity.fromHoliday(holiday);
         return holidayJpaRepository.save(holidayEntity);

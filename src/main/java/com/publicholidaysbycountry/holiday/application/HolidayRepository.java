@@ -23,4 +23,6 @@ public interface HolidayRepository {
     Page<Holiday> findAllByFilter(LocalDate from, LocalDate to, List<HolidayType> types, Boolean hasCounty,
                                   Boolean fixed,
                                   Boolean global, Integer launchYear, List<String> countryCode, Pageable pageable);
+
+    int deleteByYearAndCountryCode(Integer year, String code);
 }
