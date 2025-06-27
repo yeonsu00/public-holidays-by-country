@@ -4,6 +4,7 @@ import com.publicholidaysbycountry.holiday.domain.Holiday;
 import com.publicholidaysbycountry.holiday.domain.HolidayType;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Set;
 
 public record HolidayDTO(
     LocalDate date,
@@ -17,7 +18,7 @@ public record HolidayDTO(
     List<HolidayType> types
 ) {
 
-    public static List<Holiday> toHolidays(List<HolidayDTO> holidayDTOs) {
+    public static List<Holiday> toHolidays(Set<HolidayDTO> holidayDTOs) {
         return holidayDTOs.stream()
             .map(Holiday::fromHolidayDTO)
             .toList();

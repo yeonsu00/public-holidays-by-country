@@ -9,8 +9,10 @@ import com.publicholidaysbycountry.holiday.domain.HolidayType;
 import com.publicholidaysbycountry.holiday.infrastructure.HolidayJdbcRepository;
 import com.publicholidaysbycountry.holiday.presentation.response.HolidayResponseDTO;
 import java.time.LocalDate;
-import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -74,14 +76,15 @@ public class HolidayService {
 
     @Transactional
     public int refreshHolidaysByYearAndCountry(Integer year, Country country) {
-        List<HolidayDTO> holidayDTOs = List.of(holidayApiClient.getHolidayApiRequest(country, year));
+        Set<HolidayDTO> holidayDTOs = new HashSet<>(
+                Arrays.asList(holidayApiClient.getHolidayApiRequest(country, year)));
         List<Holiday> newHolidays = HolidayDTO.toHolidays(holidayDTOs);
 
         return holidayJdbcRepository.upsertWithCountiesAndTypes(newHolidays);
     }
 
     private List<Holiday> getHolidaysByCountryAndYear(List<Country> countries, int currentYear) {
-        List<HolidayDTO> holidayDTOs = new ArrayList<>();
+        Set<HolidayDTO> holidayDTOs = new HashSet<>();
 
         for (Country country : countries) {
             for (int year = currentYear; year >= currentYear - Constants.YEAR_RANGE; year--) {
