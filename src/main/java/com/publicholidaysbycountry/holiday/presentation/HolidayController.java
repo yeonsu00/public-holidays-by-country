@@ -7,19 +7,22 @@ import com.publicholidaysbycountry.global.response.CommonApiResponse;
 import com.publicholidaysbycountry.holiday.application.HolidayInitializationFacade;
 import com.publicholidaysbycountry.holiday.application.HolidayService;
 import com.publicholidaysbycountry.holiday.presentation.request.FilterRequest;
+import com.publicholidaysbycountry.holiday.presentation.request.RefreshHolidayRequest;
 import com.publicholidaysbycountry.holiday.presentation.request.YearAndCountryFilterRequest;
 import com.publicholidaysbycountry.holiday.presentation.response.HolidayResponseDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import java.time.LocalDate;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -46,7 +49,7 @@ public class HolidayController {
     @Operation(summary = "연도별·국가별 필터 기반 공휴일 조회", description = "연도별·국가별 필터 기반으로 공휴일을 페이징 처리하여 조회합니다.")
     @GetMapping
     public CommonApiResponse<List<HolidayResponseDTO>> getHolidaysByYearAndCountry(
-            @Validated @ModelAttribute YearAndCountryFilterRequest request) {
+            @Valid @ModelAttribute YearAndCountryFilterRequest request) {
         List<Integer> year = request.getYear();
         List<String> countryCode = request.getCountryCode();
         int page = request.getPageOrDefault();
@@ -74,7 +77,7 @@ public class HolidayController {
     @Operation(summary = "필터 기반 공휴일 조회", description = "date, type, county, fixed, global, launchYear, countryCode별 필터 기반으로 공휴일을 페이징 처리하여 조회합니다.")
     @GetMapping("/filter")
     public CommonApiResponse<List<HolidayResponseDTO>> getHolidaysByFilter(
-            @Validated @ModelAttribute FilterRequest request) {
+            @Valid @ModelAttribute FilterRequest request) {
         PageRequest pageRequest = PageRequest.of(request.getPageOrDefault(), request.getSizeOrDefault());
 
         Page<HolidayResponseDTO> holidayPage = holidayService.getHolidaysByFilter(
@@ -83,6 +86,16 @@ public class HolidayController {
         );
 
         return getHolidaysCommonApiResponse(holidayPage);
+    }
+
+    @Operation(summary = "연도·국가별 공휴일 재동기화", description = "연도와 국가를 기준으로 공휴일을 재동기화합니다.")
+    @PatchMapping
+    public CommonApiResponse<String> refreshHolidaysByYearAndCountry(
+            @Valid @RequestBody RefreshHolidayRequest request) {
+        Country country = countryService.getCountryByCode(request.getCountryCode());
+        int upsertedHolidayCount = holidayService.refreshHolidaysByYearAndCountry(request.getYear(), country);
+
+        return CommonApiResponse.success(upsertedHolidayCount + "개의 공휴일이 재동기화되었습니다.");
     }
 
     private CommonApiResponse<List<HolidayResponseDTO>> getHolidaysCommonApiResponse(

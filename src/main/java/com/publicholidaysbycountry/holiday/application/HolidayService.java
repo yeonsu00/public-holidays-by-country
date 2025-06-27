@@ -6,6 +6,7 @@ import com.publicholidaysbycountry.global.exception.InvalidHolidayTypeException;
 import com.publicholidaysbycountry.holiday.application.dto.HolidayDTO;
 import com.publicholidaysbycountry.holiday.domain.Holiday;
 import com.publicholidaysbycountry.holiday.domain.HolidayType;
+import com.publicholidaysbycountry.holiday.infrastructure.HolidayJdbcRepository;
 import com.publicholidaysbycountry.holiday.presentation.response.HolidayResponseDTO;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -22,6 +23,7 @@ public class HolidayService {
 
     private final HolidayRepository holidayRepository;
     private final HolidayApiClient holidayApiClient;
+    private final HolidayJdbcRepository holidayJdbcRepository;
 
     @Transactional
     public int saveHolidays(List<Country> countries, int currentYear) {
@@ -33,22 +35,10 @@ public class HolidayService {
         holidayRepository.deleteAll();
     }
 
-    private List<Holiday> getHolidaysByCountryAndYear(List<Country> countries, int currentYear) {
-        List<HolidayDTO> holidayDTOs = new ArrayList<>();
-
-        for (Country country : countries) {
-            for (int year = currentYear; year >= currentYear - Constants.YEAR_RANGE; year--) {
-                holidayDTOs.addAll(List.of(holidayApiClient.getHolidayApiRequest(country, year)));
-            }
-        }
-
-        return HolidayDTO.toHolidays(holidayDTOs);
-    }
-
     @Transactional(readOnly = true)
     public Page<HolidayResponseDTO> getHolidaysByYearAndCountry(List<Integer> year, List<String> countryCode,
                                                                 Pageable pageable) {
-        Page<Holiday> holidays = holidayRepository.findByYearAndCountryCode(year, countryCode, pageable);
+        Page<Holiday> holidays = holidayRepository.findByYearInAndCountryCodeIn(year, countryCode, pageable);
         return holidays.map(HolidayResponseDTO::fromHoliday);
     }
 
@@ -80,6 +70,26 @@ public class HolidayService {
         Page<Holiday> holidays = holidayRepository.findAllByFilter(from, to, validatedTypes, hasCounty, fixed, global,
                 launchYear, countryCode, pageable);
         return holidays.map(HolidayResponseDTO::fromHoliday);
+    }
+
+    @Transactional
+    public int refreshHolidaysByYearAndCountry(Integer year, Country country) {
+        List<HolidayDTO> holidayDTOs = List.of(holidayApiClient.getHolidayApiRequest(country, year));
+        List<Holiday> newHolidays = HolidayDTO.toHolidays(holidayDTOs);
+
+        return holidayJdbcRepository.upsertWithCountiesAndTypes(newHolidays);
+    }
+
+    private List<Holiday> getHolidaysByCountryAndYear(List<Country> countries, int currentYear) {
+        List<HolidayDTO> holidayDTOs = new ArrayList<>();
+
+        for (Country country : countries) {
+            for (int year = currentYear; year >= currentYear - Constants.YEAR_RANGE; year--) {
+                holidayDTOs.addAll(List.of(holidayApiClient.getHolidayApiRequest(country, year)));
+            }
+        }
+
+        return HolidayDTO.toHolidays(holidayDTOs);
     }
 
     private List<HolidayType> validateTypes(List<String> types) {
