@@ -6,12 +6,14 @@ import com.publicholidaysbycountry.holiday.application.HolidayService;
 import java.time.LocalDate;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
+@Slf4j
 public class HolidayInitializer {
 
     private final CountryService countryService;
@@ -20,6 +22,8 @@ public class HolidayInitializer {
     @EventListener(ApplicationReadyEvent.class)
     public void initializeHolidays() {
         List<Country> countries = countryService.saveCountries();
-        holidayService.saveHolidays(countries, LocalDate.now().getYear());
+        log.info("국가 데이터 일괄 적재 완료: 국가 {}개 저장", countries.size());
+        int savedHolidayCount = holidayService.saveHolidays(countries, LocalDate.now().getYear());
+        log.info("공휴일 데이터 일괄 적재 완료: 공휴일 {}개 저장", savedHolidayCount);
     }
 }
