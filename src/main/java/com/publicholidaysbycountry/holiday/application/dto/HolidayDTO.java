@@ -24,4 +24,17 @@ public record HolidayDTO(
             .toList();
     }
 
+    public Holiday toHoliday() {
+        return Holiday.builder()
+            .date(date)
+            .localName(localName)
+            .name(name)
+            .countryCode(countryCode)
+            .fixed(fixed)
+            .global(global)
+            .counties(counties)
+            .launchYear(launchYear)
+            .types(types)
+            .build();
+    }
 }

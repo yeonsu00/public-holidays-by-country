@@ -3,7 +3,7 @@ spring:
     name: public-holidays-by-country
 
   datasource:
-    url: jdbc:h2:mem:public-holidays
+    url: jdbc:h2:mem:public-holidays;DB_CLOSE_DELAY=-1;INIT=RUNSCRIPT FROM 'classpath:org/springframework/batch/core/schema-h2.sql'
     driver-class-name: org.h2.Driver
     username: sa
     password:
@@ -20,6 +20,12 @@ spring:
     properties:
       hibernate:
         format_sql: true
+
+  batch:
+    jdbc:
+      initialize-schema: always
+    job:
+      enabled: false
 
 springdoc:
   api-docs:
