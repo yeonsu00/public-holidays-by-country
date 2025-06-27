@@ -10,4 +10,6 @@ public interface CountryRepository {
     void deleteAll();
 
     Country findByCode(String countryCode);
+
+    List<Country> findAll();
 }

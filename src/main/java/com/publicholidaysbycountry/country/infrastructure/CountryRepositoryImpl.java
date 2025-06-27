@@ -36,4 +36,12 @@ public class CountryRepositoryImpl implements CountryRepository {
                 .orElseThrow(() -> new CountryNotFoundException("존재하지 않는 국가 코드입니다: " + countryCode));
         return countryEntity.toCountry();
     }
+
+    @Override
+    public List<Country> findAll() {
+        List<CountryEntity> countryEntities = countryJpaRepository.findAll();
+        return countryEntities.stream()
+                .map(CountryEntity::toCountry)
+                .toList();
+    }
 }
