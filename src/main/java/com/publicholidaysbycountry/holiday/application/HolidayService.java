@@ -6,7 +6,6 @@ import com.publicholidaysbycountry.global.exception.InvalidHolidayTypeException;
 import com.publicholidaysbycountry.holiday.application.dto.HolidayDTO;
 import com.publicholidaysbycountry.holiday.domain.Holiday;
 import com.publicholidaysbycountry.holiday.domain.HolidayType;
-import com.publicholidaysbycountry.holiday.infrastructure.HolidayJdbcRepository;
 import com.publicholidaysbycountry.holiday.presentation.response.HolidayResponseDTO;
 import java.time.LocalDate;
 import java.util.Arrays;
@@ -25,7 +24,6 @@ public class HolidayService {
 
     private final HolidayRepository holidayRepository;
     private final HolidayApiClient holidayApiClient;
-    private final HolidayJdbcRepository holidayJdbcRepository;
 
     @Transactional
     public int saveHolidays(List<Country> countries, int currentYear) {
@@ -80,7 +78,7 @@ public class HolidayService {
                 Arrays.asList(holidayApiClient.getHolidayApiRequest(country, year)));
         List<Holiday> newHolidays = HolidayDTO.toHolidays(holidayDTOs);
 
-        return holidayJdbcRepository.upsertWithCountiesAndTypes(newHolidays);
+        return holidayRepository.upsertWithCountiesAndTypes(newHolidays);
     }
 
     @Transactional
