@@ -27,7 +27,7 @@ public class HolidayService {
 
     @Transactional
     public int saveHolidays(List<Country> countries, int currentYear) {
-        List<Holiday> holidays = getHolidaysByCountryAndYear(countries, currentYear);
+        List<Holiday> holidays = getHolidaysFromApiByCountryAndYear(countries, currentYear);
         return holidayRepository.save(holidays);
     }
 
@@ -86,7 +86,7 @@ public class HolidayService {
         return holidayRepository.deleteByYearAndCountryCode(year, country.getCode());
     }
 
-    private List<Holiday> getHolidaysByCountryAndYear(List<Country> countries, int currentYear) {
+    private List<Holiday> getHolidaysFromApiByCountryAndYear(List<Country> countries, int currentYear) {
         Set<HolidayDTO> holidayDTOs = new HashSet<>();
 
         for (Country country : countries) {
