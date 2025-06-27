@@ -10,6 +10,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import java.time.LocalDate;
 import java.util.Optional;
 import java.util.Set;
@@ -19,7 +20,15 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "holiday")
+@Table(
+        name = "holiday",
+        uniqueConstraints = {
+                @UniqueConstraint(
+                        name = "uk_name_year_country",
+                        columnNames = {"name", "local_name", "holiday_year", "date", "countryCode", "countiesKey"}
+                )
+        }
+)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
 public class HolidayEntity {
@@ -51,6 +60,9 @@ public class HolidayEntity {
 
     private Integer launchYear;
 
+    @Column(nullable = false)
+    private String countiesKey;
+
     @OneToMany(fetch = FetchType.LAZY)
     @JoinColumn(name = "holidayId", referencedColumnName = "holidayId")
     private Set<HolidayCountyEntity> counties;
@@ -61,8 +73,8 @@ public class HolidayEntity {
 
     @Builder
     public HolidayEntity(Long holidayId, Integer year, LocalDate date, String localName, String name,
-                         String countryCode, boolean fixed,
-                         boolean global, Integer launchYear) {
+                         String countryCode,
+                         boolean fixed, boolean global, Integer launchYear, String countiesKey) {
         this.holidayId = holidayId;
         this.year = year;
         this.date = date;
@@ -72,6 +84,7 @@ public class HolidayEntity {
         this.fixed = fixed;
         this.global = global;
         this.launchYear = launchYear;
+        this.countiesKey = countiesKey;
     }
 
     public static HolidayEntity fromHoliday(Holiday holiday) {
@@ -84,6 +97,7 @@ public class HolidayEntity {
                 .fixed(holiday.isFixed())
                 .global(holiday.isGlobal())
                 .launchYear(holiday.getLaunchYear())
+                .countiesKey(holiday.getCountiesKey())
                 .build();
 
     }

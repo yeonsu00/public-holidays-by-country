@@ -50,7 +50,7 @@ public class HolidayRepositoryImpl implements HolidayRepository {
     }
 
     @Override
-    public Page<Holiday> findByYearAndCountryCode(List<Integer> year, List<String> countryCode, Pageable pageable) {
+    public Page<Holiday> findByYearInAndCountryCodeIn(List<Integer> year, List<String> countryCode, Pageable pageable) {
         Page<HolidayEntity> holidayEntities = holidayJpaRepository.findByYearInAndCountryCodeIn(year, countryCode,
                 pageable);
         return holidayEntities.map(HolidayEntity::toHoliday);

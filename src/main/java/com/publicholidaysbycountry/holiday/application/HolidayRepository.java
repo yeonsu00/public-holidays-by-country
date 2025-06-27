@@ -12,7 +12,7 @@ public interface HolidayRepository {
 
     void deleteAll();
 
-    Page<Holiday> findByYearAndCountryCode(List<Integer> year, List<String> countryCode, Pageable pageable);
+    Page<Holiday> findByYearInAndCountryCodeIn(List<Integer> year, List<String> countryCode, Pageable pageable);
 
     Page<Holiday> findByYear(List<Integer> year, Pageable pageable);
 
