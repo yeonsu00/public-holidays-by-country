@@ -9,7 +9,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class RefreshHolidayRequest {
+public class HolidayYearAndCountryCodeRequest {
 
     @NotNull(message = "국가 코드는 필수입니다.")
     @NotBlank(message = "국가 코드는 공백일 수 없습니다.")

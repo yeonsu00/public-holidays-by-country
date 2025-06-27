@@ -7,7 +7,7 @@ import com.publicholidaysbycountry.global.response.CommonApiResponse;
 import com.publicholidaysbycountry.holiday.application.HolidayInitializationFacade;
 import com.publicholidaysbycountry.holiday.application.HolidayService;
 import com.publicholidaysbycountry.holiday.presentation.request.FilterRequest;
-import com.publicholidaysbycountry.holiday.presentation.request.RefreshHolidayRequest;
+import com.publicholidaysbycountry.holiday.presentation.request.HolidayYearAndCountryCodeRequest;
 import com.publicholidaysbycountry.holiday.presentation.request.YearAndCountryFilterRequest;
 import com.publicholidaysbycountry.holiday.presentation.response.HolidayResponseDTO;
 import io.swagger.v3.oas.annotations.Operation;
@@ -92,7 +92,7 @@ public class HolidayController {
     @Operation(summary = "연도·국가별 공휴일 재동기화", description = "연도와 국가를 기준으로 공휴일을 재동기화합니다.")
     @PatchMapping
     public CommonApiResponse<String> refreshHolidaysByYearAndCountry(
-            @Valid @RequestBody RefreshHolidayRequest request) {
+            @Valid @RequestBody HolidayYearAndCountryCodeRequest request) {
         Country country = countryService.getCountryByCode(request.getCountryCode());
         int upsertedHolidayCount = holidayService.refreshHolidaysByYearAndCountry(request.getYear(), country);
 
@@ -102,7 +102,7 @@ public class HolidayController {
     @Operation(summary = "연도·국가별 공휴일 삭제", description = "연도와 국가를 기준으로 공휴일을 삭제합니다.")
     @DeleteMapping
     public CommonApiResponse<String> deleteHolidaysByYearAndCountry(
-            @Valid @RequestBody RefreshHolidayRequest request) {
+            @Valid @RequestBody HolidayYearAndCountryCodeRequest request) {
         Country country = countryService.getCountryByCode(request.getCountryCode());
         int deletedHolidayCount = holidayService.deleteHolidaysByYearAndCountry(request.getYear(), country);
 
