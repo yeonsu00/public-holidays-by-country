@@ -6,13 +6,15 @@ import com.publicholidaysbycountry.global.exception.InvalidHolidayTypeException;
 import com.publicholidaysbycountry.holiday.application.dto.HolidayDTO;
 import com.publicholidaysbycountry.holiday.domain.Holiday;
 import com.publicholidaysbycountry.holiday.domain.HolidayType;
-import com.publicholidaysbycountry.holiday.infrastructure.HolidayJdbcRepository;
 import com.publicholidaysbycountry.holiday.presentation.response.HolidayResponseDTO;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -25,11 +27,11 @@ public class HolidayService {
 
     private final HolidayRepository holidayRepository;
     private final HolidayApiClient holidayApiClient;
-    private final HolidayJdbcRepository holidayJdbcRepository;
+    private final HolidayAsyncService holidayAsyncService;
 
     @Transactional
     public int saveHolidays(List<Country> countries, int currentYear) {
-        List<Holiday> holidays = getHolidaysByCountryAndYear(countries, currentYear);
+        List<Holiday> holidays = getHolidaysFromApiByCountryAndYear(countries, currentYear);
         return holidayRepository.save(holidays);
     }
 
@@ -67,7 +69,7 @@ public class HolidayService {
                                                         Boolean hasCounty, Boolean fixed, Boolean global,
                                                         Integer launchYear, List<String> countryCode,
                                                         Pageable pageable) {
-        List<HolidayType> validatedTypes = validateTypes(types);
+        List<HolidayType> validatedTypes = HolidayType.validateTypes(types);
 
         Page<Holiday> holidays = holidayRepository.findAllByFilter(from, to, validatedTypes, hasCounty, fixed, global,
                 launchYear, countryCode, pageable);
@@ -80,7 +82,7 @@ public class HolidayService {
                 Arrays.asList(holidayApiClient.getHolidayApiRequest(country, year)));
         List<Holiday> newHolidays = HolidayDTO.toHolidays(holidayDTOs);
 
-        return holidayJdbcRepository.upsertWithCountiesAndTypes(newHolidays);
+        return holidayRepository.upsertWithCountiesAndTypes(newHolidays);
     }
 
     @Transactional
@@ -88,30 +90,22 @@ public class HolidayService {
         return holidayRepository.deleteByYearAndCountryCode(year, country.getCode());
     }
 
-    private List<Holiday> getHolidaysByCountryAndYear(List<Country> countries, int currentYear) {
-        Set<HolidayDTO> holidayDTOs = new HashSet<>();
+    public List<Holiday> getHolidaysFromApiByCountryAndYear(List<Country> countries, int currentYear) {
+        List<CompletableFuture<List<HolidayDTO>>> futures = new ArrayList<>();
 
         for (Country country : countries) {
             for (int year = currentYear; year >= currentYear - Constants.YEAR_RANGE; year--) {
-                holidayDTOs.addAll(List.of(holidayApiClient.getHolidayApiRequest(country, year)));
+                futures.add(holidayAsyncService.getHolidaysAsync(country, year));
             }
         }
 
+        CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();
+
+        Set<HolidayDTO> holidayDTOs = futures.stream()
+                .map(CompletableFuture::join)
+                .flatMap(List::stream)
+                .collect(Collectors.toSet());
+
         return HolidayDTO.toHolidays(holidayDTOs);
-    }
-
-    private List<HolidayType> validateTypes(List<String> types) {
-        if (types == null) {
-            return null;
-        }
-
-        try {
-            return types.stream()
-                    .map(String::toUpperCase)
-                    .map(HolidayType::valueOf)
-                    .toList();
-        } catch (IllegalArgumentException e) {
-            throw new InvalidHolidayTypeException("지원하지 않는 HolidayType이 포함되어 있습니다: " + types);
-        }
     }
 }
