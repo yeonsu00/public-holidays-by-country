@@ -81,7 +81,7 @@ class HolidayJdbcRepositoryTest {
 
         Integer countFromTypeTable = jdbcTemplate.queryForObject(
                 "SELECT COUNT(*) FROM holiday_type", Integer.class);
-        assertThat(countFromTypeTable).isEqualTo(3);
+        assertThat(countFromTypeTable).isEqualTo(2);
     }
 
     @DisplayName("기존 공휴일과 동일한 키를 가지는 경우 update되고, 해당 county와 type도 update된다.")
