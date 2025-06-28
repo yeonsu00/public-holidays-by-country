@@ -6,6 +6,7 @@ import com.publicholidaysbycountry.country.domain.Country;
 import com.publicholidaysbycountry.holiday.domain.Holiday;
 import com.publicholidaysbycountry.holiday.domain.HolidayType;
 import com.publicholidaysbycountry.holiday.presentation.response.HolidayResponseDTO;
+import jakarta.persistence.EntityManager;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -31,6 +32,9 @@ class HolidayServiceTest {
     @Autowired
     private HolidayRepository holidayRepository;
 
+    @Autowired
+    private EntityManager em;
+
     @BeforeEach
     void setUp() {
         Holiday h1 = Holiday.builder()
@@ -43,6 +47,7 @@ class HolidayServiceTest {
                 .counties(null)
                 .types(List.of(HolidayType.PUBLIC))
                 .countiesKey("")
+                .launchYear(null)
                 .build();
 
         Holiday h2 = Holiday.builder()
@@ -55,9 +60,52 @@ class HolidayServiceTest {
                 .counties(null)
                 .types(List.of(HolidayType.PUBLIC))
                 .countiesKey("")
+                .launchYear(null)
                 .build();
 
         holidayRepository.save(List.of(h1, h2));
+    }
+
+    @DisplayName("공휴일 리스트를 저장하면 저장된 개수를 반환한다.")
+    @Test
+    void saveHolidays() {
+        // given
+        Holiday h3 = Holiday.builder()
+                .date(LocalDate.of(2023, 1, 1))
+                .localName("새해")
+                .name("New Year's Day")
+                .countryCode("KR")
+                .fixed(true)
+                .global(true)
+                .counties(null)
+                .types(List.of(HolidayType.PUBLIC))
+                .countiesKey("")
+                .launchYear(null)
+                .build();
+
+        Holiday h4 = Holiday.builder()
+                .date(LocalDate.of(2022, 1, 1))
+                .localName("New Year's Day")
+                .name("New Year's Day")
+                .countryCode("US")
+                .fixed(true)
+                .global(true)
+                .counties(null)
+                .types(List.of(HolidayType.PUBLIC))
+                .countiesKey("")
+                .launchYear(null)
+                .build();
+
+        List<Holiday> holidays = List.of(h3, h4);
+
+        // when
+        int savedCount = holidayService.saveHolidays(holidays);
+
+        // then
+        assertThat(savedCount).isEqualTo(2);
+        Page<Holiday> savedPage = holidayRepository.findAll(PageRequest.of(0, 10));
+        List<Holiday> saved = savedPage.getContent();
+        assertThat(saved).hasSize(4);
     }
 
 
@@ -130,6 +178,134 @@ class HolidayServiceTest {
         // then
         assertThat(result).isNotNull();
         assertThat(result.getContent()).isInstanceOf(List.class);
+    }
+
+    @DisplayName("기존 데이터와 동일한 키를 가진 공휴일이 주어지면 해당 공휴일를 update한다.")
+    @Test
+    void refreshHolidaysByYearAndCountry_update() {
+        Holiday updatedHoliday = Holiday.builder()
+                .date(LocalDate.of(2024, 1, 1))
+                .localName("새해")
+                .name("New Year's Day")
+                .countryCode("KR")
+                .fixed(false)
+                .global(false)
+                .counties(null)
+                .types(List.of(HolidayType.PUBLIC))
+                .countiesKey("")
+                .launchYear(2000)
+                .build();
+
+        // when
+        int updatedCount = holidayService.refreshHolidaysByYearAndCountry(List.of(updatedHoliday));
+
+        // then
+        assertThat(updatedCount).isEqualTo(1);
+
+        em.flush();
+        em.clear();
+        Holiday result = holidayRepository.findAll(PageRequest.of(0, 10))
+                .getContent().stream()
+                .filter(h -> h.getDate().equals(LocalDate.of(2024, 1, 1)) && h.getCountryCode().equals("KR"))
+                .findFirst()
+                .orElseThrow();
+
+        assertThat(result.isFixed()).isFalse();
+        assertThat(result.isGlobal()).isFalse();
+        assertThat(result.getLaunchYear()).isEqualTo(2000);
+    }
+
+    @DisplayName("기존과 다른 키를 가진 공휴일이 주어지면 새롭게 insert한다.")
+    @Test
+    void refreshHolidaysByYearAndCountry_insert() {
+        // given
+        Holiday newHoliday = Holiday.builder()
+                .date(LocalDate.of(2023, 12, 25))
+                .localName("Christmas Day")
+                .name("Christmas Day")
+                .countryCode("AD")
+                .fixed(true)
+                .global(true)
+                .launchYear(null)
+                .counties(null)
+                .types(List.of(HolidayType.PUBLIC))
+                .countiesKey("")
+                .build();
+
+        // when
+        int insertedCount = holidayService.refreshHolidaysByYearAndCountry(List.of(newHoliday));
+
+        // then
+        assertThat(insertedCount).isEqualTo(1);
+
+        Page<Holiday> holidayPage = holidayRepository.findAll(PageRequest.of(0, 10));
+        List<Holiday> holidays = holidayPage.getContent();
+        assertThat(holidays).hasSize(3);
+
+        Holiday inserted = holidays.stream()
+                .filter(h -> h.getCountryCode().equals("AD"))
+                .findFirst()
+                .orElseThrow();
+
+        assertThat(inserted.getName()).isEqualTo("Christmas Day");
+    }
+
+    @DisplayName("필터 조건에 따라 공휴일을 조회한다.")
+    @Test
+    void getHolidaysByFilter() {
+        // given
+        Holiday h3 = Holiday.builder()
+                .date(LocalDate.of(2020, 1, 1))
+                .localName("새해")
+                .name("New Year's Day")
+                .countryCode("KR")
+                .fixed(true)
+                .global(true)
+                .counties(List.of("Seoul"))
+                .types(List.of(HolidayType.PUBLIC))
+                .countiesKey("Seoul")
+                .launchYear(2000)
+                .build();
+
+        Holiday h4 = Holiday.builder()
+                .date(LocalDate.of(2025, 12, 25))
+                .localName("크리스마스")
+                .name("Christmas Day")
+                .countryCode("US")
+                .fixed(false)
+                .global(false)
+                .counties(null)
+                .types(List.of(HolidayType.BANK))
+                .countiesKey("")
+                .launchYear(1990)
+                .build();
+
+        holidayRepository.save(List.of(h3, h4));
+
+        em.flush();
+        em.clear();
+
+        LocalDate from = LocalDate.of(2020, 1, 1);
+        LocalDate to = LocalDate.of(2025, 12, 31);
+        List<String> types = List.of("PUBLIC");
+        Boolean hasCounty = true;
+        Boolean fixed = true;
+        Boolean global = true;
+        Integer launchYear = 2000;
+        List<String> countryCode = List.of("KR");
+
+        Pageable pageable = PageRequest.of(0, 10);
+
+        // when
+        Page<HolidayResponseDTO> result = holidayService.getHolidaysByFilter(
+                from, to, types, hasCounty, fixed, global, launchYear, countryCode, pageable);
+
+        // then
+        assertThat(result.getContent()).hasSize(1);
+        HolidayResponseDTO dto = result.getContent().getFirst();
+        assertThat(dto.date()).isEqualTo("2020-01-01");
+        assertThat(dto.countryCode()).isEqualTo("KR");
+        assertThat(dto.types()).contains(HolidayType.PUBLIC);
     }
 
     @Test
