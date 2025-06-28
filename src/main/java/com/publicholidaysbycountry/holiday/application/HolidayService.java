@@ -2,7 +2,6 @@ package com.publicholidaysbycountry.holiday.application;
 
 import com.publicholidaysbycountry.country.domain.Country;
 import com.publicholidaysbycountry.global.Constants;
-import com.publicholidaysbycountry.global.exception.InvalidHolidayTypeException;
 import com.publicholidaysbycountry.holiday.application.dto.HolidayDTO;
 import com.publicholidaysbycountry.holiday.domain.Holiday;
 import com.publicholidaysbycountry.holiday.domain.HolidayType;
@@ -90,7 +89,7 @@ public class HolidayService {
         return holidayRepository.deleteByYearAndCountryCode(year, country.getCode());
     }
 
-    public List<Holiday> getHolidaysFromApiByCountryAndYear(List<Country> countries, int currentYear) {
+    private List<Holiday> getHolidaysFromApiByCountryAndYear(List<Country> countries, int currentYear) {
         List<CompletableFuture<List<HolidayDTO>>> futures = new ArrayList<>();
 
         for (Country country : countries) {

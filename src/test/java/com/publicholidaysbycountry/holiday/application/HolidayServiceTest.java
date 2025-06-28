@@ -1,0 +1,149 @@
+package com.publicholidaysbycountry.holiday.application;
+
+import static org.assertj.core.api.Assertions.*;
+
+import com.publicholidaysbycountry.country.domain.Country;
+import com.publicholidaysbycountry.holiday.domain.Holiday;
+import com.publicholidaysbycountry.holiday.domain.HolidayType;
+import com.publicholidaysbycountry.holiday.presentation.response.HolidayResponseDTO;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.List;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.transaction.annotation.Transactional;
+
+@Transactional
+@SpringBootTest
+@ActiveProfiles("test")
+class HolidayServiceTest {
+
+    @Autowired
+    private HolidayService holidayService;
+
+    @Autowired
+    private HolidayRepository holidayRepository;
+
+    @BeforeEach
+    void setUp() {
+        Holiday h1 = Holiday.builder()
+                .date(LocalDate.of(2024, 1, 1))
+                .localName("새해")
+                .name("New Year's Day")
+                .countryCode("KR")
+                .fixed(true)
+                .global(true)
+                .counties(null)
+                .types(List.of(HolidayType.PUBLIC))
+                .countiesKey("")
+                .build();
+
+        Holiday h2 = Holiday.builder()
+                .date(LocalDate.of(2025, 1, 1))
+                .localName("New Year's Day")
+                .name("New Year's Day")
+                .countryCode("US")
+                .fixed(true)
+                .global(true)
+                .counties(null)
+                .types(List.of(HolidayType.PUBLIC))
+                .countiesKey("")
+                .build();
+
+        holidayRepository.save(List.of(h1, h2));
+    }
+
+
+    @Test
+    @DisplayName("year, countryCode 조건에 맞는 공휴일을 조회한다.")
+    void getHolidaysByYearAndCountry() {
+        // given
+        List<Integer> years = List.of(2024, 2025);
+        List<String> countryCodes = List.of("KR", "US");
+        Pageable pageable = PageRequest.of(0, 10);
+
+        // when
+        Page<HolidayResponseDTO> result = holidayService.getHolidaysByYearAndCountry(years, countryCodes, pageable);
+
+        // then
+        assertThat(result).isNotEmpty();
+        result.forEach(dto -> {
+            assertThat(countryCodes).contains(dto.countryCode());
+        });
+        assertThat(result.getContent()).hasSize(2);
+    }
+
+    @DisplayName("year 조건에 맞는 공휴일을 조회한다.")
+    @Test
+    void getHolidaysByYear() {
+        // given
+        List<Integer> years = List.of(2024);
+        Pageable pageable = PageRequest.of(0, 10);
+
+        // when
+        Page<HolidayResponseDTO> result = holidayService.getHolidaysByYear(years, pageable);
+
+        // then
+        assertThat(result).isNotEmpty();
+        DateTimeFormatter formatter = DateTimeFormatter.ISO_DATE;
+
+        result.forEach(dto -> {
+            LocalDate date = LocalDate.parse(dto.date(), formatter);
+            assertThat(date.getYear()).isEqualTo(2024);
+        });
+
+        assertThat(result.getContent()).hasSize(1);
+    }
+
+    @DisplayName("country 조건에 맞는 공휴일을 조회한다.")
+    @Test
+    void getHolidaysByCountry() {
+        // given
+        List<String> countryCodes = List.of("KR");
+        Pageable pageable = PageRequest.of(0, 10);
+
+        // when
+        Page<HolidayResponseDTO> result = holidayService.getHolidaysByCountry(countryCodes, pageable);
+
+        // then
+        assertThat(result).isNotEmpty();
+        result.forEach(dto -> assertThat(dto.countryCode()).isEqualTo("KR"));
+        assertThat(result.getContent()).hasSize(1);
+    }
+
+    @DisplayName("전체 공휴일을 조회하면 페이지 결과를 반환한다.")
+    @Test
+    void getAllHolidays_returnsPage() {
+        // given
+        Pageable pageable = PageRequest.of(0, 10);
+
+        // when
+        var result = holidayService.getAllHolidays(pageable);
+
+        // then
+        assertThat(result).isNotNull();
+        assertThat(result.getContent()).isInstanceOf(List.class);
+    }
+
+    @Test
+    @DisplayName("year와 country로 해당하는 공휴일만 삭제한다.")
+    void deleteHolidaysByYearAndCountry() {
+        // given
+        Country us = new Country("US", "United States");
+
+        // when
+        int deletedCount = holidayService.deleteHolidaysByYearAndCountry(2025, us);
+
+        // then
+        assertThat(deletedCount).isEqualTo(1);
+    }
+
+}
+
