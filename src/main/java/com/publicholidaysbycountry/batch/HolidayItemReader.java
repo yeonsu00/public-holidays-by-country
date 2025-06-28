@@ -2,7 +2,7 @@ package com.publicholidaysbycountry.batch;
 
 import com.publicholidaysbycountry.country.application.CountryRepository;
 import com.publicholidaysbycountry.country.domain.Country;
-import com.publicholidaysbycountry.holiday.application.HolidayApiClient;
+import com.publicholidaysbycountry.holiday.infrastructure.api.HolidayApiClient;
 import com.publicholidaysbycountry.holiday.application.dto.HolidayDTO;
 import jakarta.annotation.PostConstruct;
 import java.time.LocalDate;

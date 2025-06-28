@@ -4,8 +4,10 @@ import com.publicholidaysbycountry.country.application.CountryService;
 import com.publicholidaysbycountry.country.domain.Country;
 import com.publicholidaysbycountry.global.Constants;
 import com.publicholidaysbycountry.global.response.CommonApiResponse;
+import com.publicholidaysbycountry.holiday.application.HolidayApiService;
 import com.publicholidaysbycountry.holiday.application.HolidayInitializationFacade;
 import com.publicholidaysbycountry.holiday.application.HolidayService;
+import com.publicholidaysbycountry.holiday.domain.Holiday;
 import com.publicholidaysbycountry.holiday.presentation.request.FilterRequest;
 import com.publicholidaysbycountry.holiday.presentation.request.HolidayYearAndCountryCodeRequest;
 import com.publicholidaysbycountry.holiday.presentation.request.YearAndCountryFilterRequest;
@@ -38,6 +40,7 @@ public class HolidayController {
     private final CountryService countryService;
     private final HolidayService holidayService;
     private final HolidayInitializationFacade holidayInitializationFacade;
+    private final HolidayApiService holidayApiService;
 
     @Operation(summary = "국가별 공휴일 저장", description = "외부 API에서 가져온 국가별 공휴일을 저장합니다.")
     @PostMapping
@@ -48,7 +51,8 @@ public class HolidayController {
         List<Country> countries = countryService.saveCountries();
         log.info("국가 데이터 저장 완료: 국가 {}개 저장", countries.size());
 
-        int savedHolidayCount = holidayService.saveHolidays(countries, LocalDate.now().getYear());
+        List<Holiday> holidays = holidayApiService.getHolidaysFromApiByCountryAndYear(countries, LocalDate.now().getYear());
+        int savedHolidayCount = holidayService.saveHolidays(holidays);
         log.info("공휴일 데이터 저장 완료: 공휴일 {}개 저장", savedHolidayCount);
 
         return CommonApiResponse.success(
@@ -111,7 +115,9 @@ public class HolidayController {
             @Valid @RequestBody HolidayYearAndCountryCodeRequest request) {
         log.info("공휴일 재동기화 요청: 연도={}, 국가 코드={}", request.getYear(), request.getCountryCode());
         Country country = countryService.getCountryByCode(request.getCountryCode());
-        int upsertedHolidayCount = holidayService.refreshHolidaysByYearAndCountry(request.getYear(), country);
+
+        List<Holiday> newHolidays = holidayApiService.getHolidays(country, request.getYear());
+        int upsertedHolidayCount = holidayService.refreshHolidaysByYearAndCountry(newHolidays);
 
         return CommonApiResponse.success(upsertedHolidayCount + "개의 공휴일이 재동기화되었습니다.");
     }
