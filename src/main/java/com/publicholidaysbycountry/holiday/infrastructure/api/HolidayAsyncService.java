@@ -1,4 +1,4 @@
-package com.publicholidaysbycountry.holiday.application;
+package com.publicholidaysbycountry.holiday.infrastructure.api;
 
 import com.publicholidaysbycountry.country.domain.Country;
 import com.publicholidaysbycountry.holiday.application.dto.HolidayDTO;
@@ -17,7 +17,7 @@ public class HolidayAsyncService {
 
     @Async
     public CompletableFuture<List<HolidayDTO>> getHolidaysAsync(Country country, int year) {
-        HolidayDTO[] holidayArray = holidayApiClient.getHolidayApiRequest(country, year);
-        return CompletableFuture.completedFuture(Arrays.asList(holidayArray));
+        HolidayDTO[] response = holidayApiClient.getHolidayApiRequest(country, year);
+        return CompletableFuture.completedFuture(Arrays.asList(response));
     }
 }

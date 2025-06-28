@@ -1,4 +1,4 @@
-package com.publicholidaysbycountry.holiday.application;
+package com.publicholidaysbycountry.holiday.infrastructure.api;
 
 import com.publicholidaysbycountry.country.domain.Country;
 import com.publicholidaysbycountry.global.Constants;

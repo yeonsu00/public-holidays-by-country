@@ -1,4 +1,4 @@
-package com.publicholidaysbycountry.holiday.application;
+package com.publicholidaysbycountry.holiday.infrastructure;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -7,6 +7,7 @@ import static org.mockito.BDDMockito.*;
 import com.publicholidaysbycountry.country.domain.Country;
 import com.publicholidaysbycountry.global.exception.HolidayNotFoundException;
 import com.publicholidaysbycountry.holiday.application.dto.HolidayDTO;
+import com.publicholidaysbycountry.holiday.infrastructure.api.HolidayApiClient;
 import java.time.LocalDate;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

@@ -1,20 +1,11 @@
 package com.publicholidaysbycountry.holiday.application;
 
 import com.publicholidaysbycountry.country.domain.Country;
-import com.publicholidaysbycountry.global.Constants;
-import com.publicholidaysbycountry.global.exception.InvalidHolidayTypeException;
-import com.publicholidaysbycountry.holiday.application.dto.HolidayDTO;
 import com.publicholidaysbycountry.holiday.domain.Holiday;
 import com.publicholidaysbycountry.holiday.domain.HolidayType;
 import com.publicholidaysbycountry.holiday.presentation.response.HolidayResponseDTO;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
-import java.util.concurrent.CompletableFuture;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -26,12 +17,9 @@ import org.springframework.transaction.annotation.Transactional;
 public class HolidayService {
 
     private final HolidayRepository holidayRepository;
-    private final HolidayApiClient holidayApiClient;
-    private final HolidayAsyncService holidayAsyncService;
 
     @Transactional
-    public int saveHolidays(List<Country> countries, int currentYear) {
-        List<Holiday> holidays = getHolidaysFromApiByCountryAndYear(countries, currentYear);
+    public int saveHolidays(List<Holiday> holidays) {
         return holidayRepository.save(holidays);
     }
 
@@ -77,35 +65,12 @@ public class HolidayService {
     }
 
     @Transactional
-    public int refreshHolidaysByYearAndCountry(Integer year, Country country) {
-        Set<HolidayDTO> holidayDTOs = new HashSet<>(
-                Arrays.asList(holidayApiClient.getHolidayApiRequest(country, year)));
-        List<Holiday> newHolidays = HolidayDTO.toHolidays(holidayDTOs);
-
+    public int refreshHolidaysByYearAndCountry(List<Holiday> newHolidays) {
         return holidayRepository.upsertWithCountiesAndTypes(newHolidays);
     }
 
     @Transactional
     public int deleteHolidaysByYearAndCountry(Integer year, Country country) {
         return holidayRepository.deleteByYearAndCountryCode(year, country.getCode());
-    }
-
-    public List<Holiday> getHolidaysFromApiByCountryAndYear(List<Country> countries, int currentYear) {
-        List<CompletableFuture<List<HolidayDTO>>> futures = new ArrayList<>();
-
-        for (Country country : countries) {
-            for (int year = currentYear; year >= currentYear - Constants.YEAR_RANGE; year--) {
-                futures.add(holidayAsyncService.getHolidaysAsync(country, year));
-            }
-        }
-
-        CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();
-
-        Set<HolidayDTO> holidayDTOs = futures.stream()
-                .map(CompletableFuture::join)
-                .flatMap(List::stream)
-                .collect(Collectors.toSet());
-
-        return HolidayDTO.toHolidays(holidayDTOs);
     }
 }

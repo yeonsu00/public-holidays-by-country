@@ -1,6 +1,7 @@
 package com.publicholidaysbycountry.holiday.infrastructure.entity;
 
 import com.publicholidaysbycountry.holiday.domain.Holiday;
+import com.publicholidaysbycountry.holiday.domain.HolidayType;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -12,8 +13,10 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -134,5 +137,17 @@ public class HolidayEntity {
                                 .toList()
                 )
                 .build();
+    }
+
+    public void updateCounties(List<String> counties) {
+        this.counties = counties.stream()
+                .map(county -> new HolidayCountyEntity(county, this))
+                .collect(Collectors.toSet());
+    }
+
+    public void updateTypes(List<HolidayType> types) {
+        this.types = types.stream()
+                .map(type -> new HolidayTypeEntity(this, type))
+                .collect(Collectors.toSet());
     }
 }
