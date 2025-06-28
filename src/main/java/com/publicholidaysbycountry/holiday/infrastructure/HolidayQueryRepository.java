@@ -24,7 +24,8 @@ public class HolidayQueryRepository {
     private final JPAQueryFactory jpaQueryFactory;
 
     public Page<HolidayEntity> findAllByFilter(LocalDate from, LocalDate to, List<HolidayType> types, Boolean hasCounty,
-                                         Boolean fixed, Boolean global, Integer launchYear, List<String> countryCode, Pageable pageable) {
+                                               Boolean fixed, Boolean global, Integer launchYear,
+                                               List<String> countryCode, Pageable pageable) {
         QHolidayEntity qHoliday = QHolidayEntity.holidayEntity;
         QHolidayTypeEntity qType = QHolidayTypeEntity.holidayTypeEntity;
         QHolidayCountyEntity qCounty = QHolidayCountyEntity.holidayCountyEntity;
@@ -35,6 +36,26 @@ public class HolidayQueryRepository {
                 .leftJoin(qHoliday.types, qType)
                 .leftJoin(qHoliday.counties, qCounty);
 
+        BooleanBuilder builder = getBooleanBuilderByFilter(from, to, types, hasCounty, fixed, global, launchYear,
+                countryCode, qHoliday, qType, qCounty);
+
+        query.where(builder);
+
+        long total = query.fetch().size();
+
+        List<HolidayEntity> results = query
+                .offset(pageable.getOffset())
+                .limit(pageable.getPageSize())
+                .fetch();
+
+        return new PageImpl<>(results, pageable, total);
+    }
+
+    private BooleanBuilder getBooleanBuilderByFilter(LocalDate from, LocalDate to, List<HolidayType> types,
+                                                     Boolean hasCounty, Boolean fixed, Boolean global,
+                                                     Integer launchYear, List<String> countryCode,
+                                                     QHolidayEntity qHoliday, QHolidayTypeEntity qType,
+                                                     QHolidayCountyEntity qCounty) {
         BooleanBuilder builder = new BooleanBuilder();
 
         if (from != null) {
@@ -69,16 +90,6 @@ public class HolidayQueryRepository {
         if (countryCode != null && !countryCode.isEmpty()) {
             builder.and(qHoliday.countryCode.in(countryCode));
         }
-
-        query.where(builder);
-
-        long total = query.fetch().size();
-
-        List<HolidayEntity> results = query
-                .offset(pageable.getOffset())
-                .limit(pageable.getPageSize())
-                .fetch();
-
-        return new PageImpl<>(results, pageable, total);
+        return builder;
     }
 }
