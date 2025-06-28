@@ -3,6 +3,7 @@ package com.publicholidaysbycountry.holiday.domain;
 import static org.assertj.core.api.Assertions.*;
 
 import com.publicholidaysbycountry.global.exception.InvalidHolidayTypeException;
+import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -55,6 +56,42 @@ class HolidayTypeTest {
 
         // then
         assertThat(typeName).isEqualTo("Public");
+    }
+
+    @DisplayName("유효한 타입 리스트는 HolidayType 리스트로 변환된다.")
+    @Test
+    void validateTypes_validList() {
+        // given
+        List<String> validTypes = List.of("Public", "Bank", "School");
+
+        // when
+        List<HolidayType> holidayTypes = HolidayType.validateTypes(validTypes);
+
+        // then
+        assertThat(holidayTypes)
+                .containsExactly(HolidayType.PUBLIC, HolidayType.BANK, HolidayType.SCHOOL);
+    }
+
+    @DisplayName("타입 리스트로 null 입력 시 null이 반환된다.")
+    @Test
+    void validateTypes_nullInput() {
+        // when
+        List<HolidayType> holidayTypes = HolidayType.validateTypes(null);
+
+        // then
+        assertThat(holidayTypes).isNull();
+    }
+
+    @DisplayName("타입 리스트에 유효하지 않은 타입 포함 시 예외가 발생한다.")
+    @Test
+    void validateTypes_invalidType() {
+        // given
+        List<String> invalidTypes = List.of("Public", "InvalidType");
+
+        // when & then
+        assertThatThrownBy(() -> HolidayType.validateTypes(invalidTypes))
+                .isInstanceOf(InvalidHolidayTypeException.class)
+                .hasMessageContaining("에 해당하는 공휴일 타입을 찾을 수 없습니다.");
     }
 
 }
