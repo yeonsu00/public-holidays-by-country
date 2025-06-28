@@ -3,6 +3,7 @@ package com.publicholidaysbycountry.holiday.domain;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 import com.publicholidaysbycountry.global.exception.InvalidHolidayTypeException;
+import java.util.List;
 
 public enum HolidayType {
 
@@ -33,6 +34,14 @@ public enum HolidayType {
             }
         }
         throw new InvalidHolidayTypeException(typeName + "에 해당하는 공휴일 타입을 찾을 수 없습니다.");
+    }
+
+    public static List<HolidayType> validateTypes(List<String> typeNames) {
+        if (typeNames == null) return null;
+
+        return typeNames.stream()
+                .map(HolidayType::from)
+                .toList();
     }
 
 }
