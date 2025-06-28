@@ -19,15 +19,14 @@ public class HolidayJdbcRepository {
             Long holidayId = findHolidayId(holiday);
 
             if (holiday.getCounties() != null && !holiday.getCounties().isEmpty()) {
-                insertCounties(holidayId, holiday.getCounties());
+                updateCounties(holidayId, holiday.getCounties());
             }
 
             if (holiday.getTypes() != null && !holiday.getTypes().isEmpty()) {
-                insertTypes(holidayId, holiday.getTypes()
-                        .stream()
+                List<String> typeNames = holiday.getTypes().stream()
                         .map(Enum::name)
-                        .toList()
-                );
+                        .toList();
+                updateTypes(holidayId, typeNames);
             }
 
         }
@@ -80,6 +79,38 @@ public class HolidayJdbcRepository {
         return jdbcTemplate.queryForObject(sql, Long.class, params);
     }
 
+    private void updateCounties(Long holidayId, List<String> newCounties) {
+        List<String> existingCountyName = findExistingCounties(holidayId);
+
+        List<String> toAddCounty = newCounties.stream()
+                .filter(c -> !existingCountyName.contains(c))
+                .toList();
+
+        List<String> toRemoveCounty = existingCountyName.stream()
+                .filter(c -> !newCounties.contains(c))
+                .toList();
+
+        if (!toAddCounty.isEmpty()) {
+            insertCounties(holidayId, toAddCounty);
+        }
+        if (!toRemoveCounty.isEmpty()) {
+            deleteCounties(holidayId, toRemoveCounty);
+        }
+    }
+
+    private List<String> findExistingCounties(Long holidayId) {
+        String sql = "SELECT county_name FROM holiday_county WHERE holiday_id = ?";
+        return jdbcTemplate.queryForList(sql, String.class, holidayId);
+    }
+
+    private void deleteCounties(Long holidayId, List<String> counties) {
+        String sql = "DELETE FROM holiday_county WHERE holiday_id = ? AND county_name = ?";
+        List<Object[]> params = counties.stream()
+                .map(county -> new Object[]{holidayId, county})
+                .toList();
+        jdbcTemplate.batchUpdate(sql, params);
+    }
+
     private void insertCounties(Long holidayId, List<String> counties) {
         String sql = """
                 INSERT INTO holiday_county (holiday_id, county_name)
@@ -90,6 +121,38 @@ public class HolidayJdbcRepository {
                 .map(county -> new Object[]{holidayId, county})
                 .toList();
 
+        jdbcTemplate.batchUpdate(sql, params);
+    }
+
+    private void updateTypes(Long holidayId, List<String> newTypes) {
+        List<String> existingTypes = findExistingTypes(holidayId);
+
+        List<String> toAddTypes = newTypes.stream()
+                .filter(t -> !existingTypes.contains(t))
+                .toList();
+
+        List<String> toRemoveTypes = existingTypes.stream()
+                .filter(t -> !newTypes.contains(t))
+                .toList();
+
+        if (!toAddTypes.isEmpty()) {
+            insertTypes(holidayId, toAddTypes);
+        }
+        if (!toRemoveTypes.isEmpty()) {
+            deleteTypes(holidayId, toRemoveTypes);
+        }
+    }
+
+    private List<String> findExistingTypes(Long holidayId) {
+        String sql = "SELECT type FROM holiday_type WHERE holiday_id = ?";
+        return jdbcTemplate.queryForList(sql, String.class, holidayId);
+    }
+
+    private void deleteTypes(Long holidayId, List<String> types) {
+        String sql = "DELETE FROM holiday_type WHERE holiday_id = ? AND type = ?";
+        List<Object[]> params = types.stream()
+                .map(type -> new Object[]{holidayId, type})
+                .toList();
         jdbcTemplate.batchUpdate(sql, params);
     }
 
