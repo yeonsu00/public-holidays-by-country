@@ -3,9 +3,7 @@ package com.publicholidaysbycountry.holiday.infrastructure;
 import com.publicholidaysbycountry.holiday.application.HolidayRepository;
 import com.publicholidaysbycountry.holiday.domain.Holiday;
 import com.publicholidaysbycountry.holiday.domain.HolidayType;
-import com.publicholidaysbycountry.holiday.infrastructure.entity.HolidayCountyEntity;
 import com.publicholidaysbycountry.holiday.infrastructure.entity.HolidayEntity;
-import com.publicholidaysbycountry.holiday.infrastructure.entity.HolidayTypeEntity;
 import java.time.LocalDate;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -32,11 +30,11 @@ public class HolidayRepositoryImpl implements HolidayRepository {
             savedHolidayCount++;
 
             if (holiday.hasCounties()) {
-                saveHolidayCounties(holiday, savedHolidayEntity);
+                savedHolidayEntity.updateCounties(holiday.getCounties());
             }
 
             if (holiday.hasTypes()) {
-                saveHolidayTypes(holiday, savedHolidayEntity);
+                savedHolidayEntity.updateTypes(holiday.getTypes());
             }
         }
 
@@ -97,19 +95,5 @@ public class HolidayRepositoryImpl implements HolidayRepository {
     private HolidayEntity saveHoliday(Holiday holiday) {
         HolidayEntity holidayEntity = HolidayEntity.fromHoliday(holiday);
         return holidayJpaRepository.save(holidayEntity);
-    }
-
-    private void saveHolidayCounties(Holiday holiday, HolidayEntity savedHolidayEntity) {
-        List<HolidayCountyEntity> countyEntities = holiday.getCounties().stream()
-                .map(countyName -> new HolidayCountyEntity(countyName, savedHolidayEntity))
-                .toList();
-        holidayCountyJpaRepository.saveAll(countyEntities);
-    }
-
-    private void saveHolidayTypes(Holiday holiday, HolidayEntity savedHolidayEntity) {
-        List<HolidayTypeEntity> holidayTypeEntities = holiday.getTypes().stream()
-                .map(type -> new HolidayTypeEntity(savedHolidayEntity, type))
-                .toList();
-        holidayTypeJpaRepository.saveAll(holidayTypeEntities);
     }
 }
